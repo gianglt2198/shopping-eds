@@ -1,0 +1,15 @@
+version: v1
+name: buf.build/gianglt/product
+deps:
+  - buf.build/googleapis/googleapis
+  - buf.build/grpc-ecosystem/grpc-gateway
+  - buf.build/envoyproxy/protoc-gen-validate
+  - buf.build/yamnord/gogoproto
+lint:
+  enum_zero_value_suffix: _UNKNOWN
+  except:
+    - PACKAGE_VERSION_SUFFIX
+    - PACKAGE_DIRECTORY_MATCH
+breaking:
+  use:
+    - FILE

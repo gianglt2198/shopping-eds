@@ -1,0 +1,74 @@
+syntax = "proto3";
+option go_package = "./proto;pb";
+package paymentpb;
+
+import "google/api/annotations.proto";
+
+service PaymentsService {
+  rpc CreateInvoice(CreateInvoiceRequest) returns (CreateInvoiceResponse) {
+    option (google.api.http) = {
+      post: "/api/payment",
+      body: "*"
+    };
+  };
+  rpc GetInvoice(GetInvoiceRequest) returns (GetInvoiceResponse) {
+    option (google.api.http) = {
+      get: "/api/payment",
+    };
+  };
+  rpc PayInvoice(PayInvoiceRequest) returns (PayInvoiceResponse) {
+    option (google.api.http) = {
+      post: "/api/payment/pay",
+    };
+  };
+  rpc CancelInvoice(CancelInvoiceRequest) returns (CancelInvoiceResponse) {
+    option (google.api.http) = {
+      post: "/api/payment/cancel",
+      body: "*"
+    };
+  };
+}
+
+message Invoice {
+  string id = 1;
+  string customer_id = 2;
+  string order_id = 3;
+  double amount = 4;
+  string status = 5;
+}
+
+message CreateInvoiceRequest {
+  string customer_id = 1;
+  string order_id = 2;
+  double amount = 3;
+}
+
+message CreateInvoiceResponse {
+  string status_code = 1;
+  string id = 2;
+}
+
+message GetInvoiceRequest {
+  string id = 1;
+}
+
+message GetInvoiceResponse {
+  string status_code = 1;
+  Invoice invoice = 2;
+}
+
+message PayInvoiceRequest {
+  string id = 1;
+}
+
+message PayInvoiceResponse {
+  string status_code = 1;
+}
+
+message CancelInvoiceRequest {
+  string id = 1;
+}
+
+message CancelInvoiceResponse {
+  string status_code = 1;
+}

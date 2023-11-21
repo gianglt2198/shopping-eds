@@ -1,0 +1,45 @@
+syntax = "proto3";
+option go_package = "./proto;pb";
+package customerpb;
+
+import "google/api/annotations.proto";
+
+service CustomersService {
+    rpc RegisterCustomer(RegisterCustomerRequest) returns (RegisterCustomerResponse) {
+        option (google.api.http) = {
+            post: "/api/customer/register",
+            body: "*"
+        };
+    };
+    rpc GetCustomer(GetCustomerRequest) returns (GetCustomerResponse) {
+        option (google.api.http) = {
+            get: "/api/customer",
+        };
+    };
+}
+
+message Customer {
+    string id = 1;
+    string name = 2;
+    string sms_number = 3;
+    string email = 4;
+    bool active = 5;
+}
+
+message RegisterCustomerRequest {
+    string name = 1;
+    string sms_number = 2;
+    string email = 3;
+}
+message RegisterCustomerResponse {
+    string status_code = 1;
+    string id = 2;
+}
+
+message GetCustomerRequest {
+    string id = 1;
+}
+message GetCustomerResponse {
+    string status_code = 1;
+    Customer customer = 2;
+}

@@ -1,0 +1,113 @@
+syntax = "proto3";
+option go_package = "./proto;pb";
+package orderpb;
+
+import "google/api/annotations.proto";
+
+service OrderingService {
+    rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
+        option (google.api.http) = {
+            post: "/api/order/create",
+            body: "*"
+        };
+    };
+    rpc GetOrder(GetOrderRequest) returns (GetOrderResponse) {
+        option (google.api.http) = {
+            get: "/api/order",
+        };
+    };
+    rpc AddItem(AddItemRequest) returns (AddItemResponse) {
+        option (google.api.http) = {
+            post: "/api/order/item",
+            body: "*"
+        };
+    };
+    rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse) {
+        option (google.api.http) = {
+            post: "/api/order/cancel",
+            body: "*"
+        };
+    };
+    rpc ReadyOrder(ReadyOrderRequest) returns (ReadyOrderResponse) {
+        option (google.api.http) = {
+            post: "/api/order/ready",
+            body: "*"
+        };
+    };
+    rpc CompleteOrder(CompleteOrderRequest) returns (CompleteOrderResponse) {
+        option (google.api.http) = {
+            post: "/api/order/complete",
+            body: "*"
+        };
+    };
+}
+
+message Order {
+    string id = 1;
+    string customer_id = 2;
+    string payment_id = 3;
+    map<string, Item> items = 4;
+    string status = 5;
+}
+
+message Item {
+    string product_id = 2;
+    string product_name = 4;
+    double price = 5;
+    int32 quantity = 6;
+}
+  
+
+message CreateOrderRequest {
+    repeated Item items = 1;
+    string customer_id = 2;
+}
+
+message CreateOrderResponse {
+    string status_code = 1;
+    string id = 2;
+}
+
+message GetOrderRequest {
+    string id = 1;
+}
+
+message GetOrderResponse {
+    string status_code = 1;
+    Order order = 2;
+}
+
+message AddItemRequest {
+    string order_id = 1;
+    string product_id = 3;
+    int32 quantity = 4;
+}
+  
+message AddItemResponse {
+    string status_code = 1;
+}
+  
+message CancelOrderRequest {
+    string id = 1;
+}
+
+message CancelOrderResponse {
+    string status_code = 1;
+}
+
+message ReadyOrderRequest {
+    string id = 1;
+}
+
+message ReadyOrderResponse {
+    string status_code = 1;
+    string payment_id = 2;
+}
+
+message CompleteOrderRequest {
+    string id = 1;
+}
+
+message CompleteOrderResponse {
+    string status_code = 1;
+}
