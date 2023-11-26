@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"shopping/internal/ddd"
 	"shopping/order/internal/domain"
 
 	"github.com/google/wire"
@@ -12,16 +13,18 @@ type CancelOrder struct {
 }
 
 type CancelOrderHandler struct {
-	orders   domain.OrderRepository
-	payments domain.PaymentRepository
+	orders          domain.OrderRepository
+	payments        domain.PaymentRepository
+	domainPublisher ddd.EventPublisher
 }
 
 var CancelOrderUseCaseSet = wire.NewSet(NewCancelOrderHandler)
 
-func NewCancelOrderHandler(orders domain.OrderRepository, payments domain.PaymentRepository) CancelOrderHandler {
+func NewCancelOrderHandler(orders domain.OrderRepository, payments domain.PaymentRepository, domainPublisher ddd.EventPublisher) CancelOrderHandler {
 	return CancelOrderHandler{
-		orders:   orders,
-		payments: payments,
+		orders:          orders,
+		payments:        payments,
+		domainPublisher: domainPublisher,
 	}
 }
 
@@ -35,11 +38,13 @@ func (h CancelOrderHandler) CancelOrder(ctx context.Context, cmd CancelOrder) er
 		return err
 	}
 
-	if order.PaymentID != "" {
-		if err = h.payments.CancelInvoice(ctx, order.PaymentID); err != nil {
-			return err
-		}
+	if err = h.orders.Update(ctx, order); err != nil {
+		return err
 	}
 
-	return h.orders.Update(ctx, order)
+	if err = h.domainPublisher.Publish(ctx, order.GetEvents()...); err != nil {
+		return err
+	}
+
+	return nil
 }

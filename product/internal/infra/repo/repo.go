@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"shopping/internal/ddd"
 	"shopping/product/internal/domain"
 	"strings"
 
@@ -38,7 +39,9 @@ func (r ProductRepository) Find(ctx context.Context, productID string) (*domain.
 	const query = "SELECT name, description, price FROM %s WHERE id = $1 LIMIT 1"
 
 	product := &domain.Product{
-		ID: productID,
+		AggregateBase: ddd.AggregateBase{
+			ID: productID,
+		},
 	}
 
 	err := r.db.QueryRowContext(ctx, r.table(query), productID).Scan(&product.Name, &product.Description, &product.Price)
@@ -67,7 +70,7 @@ func (r ProductRepository) Update(ctx context.Context, product *domain.Product) 
 		i++
 	}
 	query.WriteString(" WHERE id = $1")
-	fmt.Println(query.String())
+
 	_, err := r.db.ExecContext(ctx, r.table(query.String()), args...)
 
 	return err

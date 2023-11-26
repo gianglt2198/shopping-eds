@@ -5,6 +5,7 @@ package application
 
 import (
 	"database/sql"
+	"shopping/internal/ddd"
 	routerGRPC "shopping/product/internal/application/router/grpc"
 	"shopping/product/internal/infra/repo"
 	"shopping/product/internal/logging"
@@ -20,6 +21,7 @@ func InitApp(
 	db *sql.DB,
 	rpc *grpc.Server,
 	logger zerolog.Logger,
+	domainPublisher ddd.EventPublisher,
 ) error {
 	panic(wire.Build(
 		logging.LoggingSet,

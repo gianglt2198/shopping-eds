@@ -2,43 +2,43 @@ package usecase
 
 import (
 	"context"
+	"shopping/internal/ddd"
 	"shopping/product/internal/domain"
+	"shopping/product/internal/usecase/commands"
+	"shopping/product/internal/usecase/queries"
 
 	"github.com/google/wire"
 )
 
 type (
-	CreateProduct struct {
-		ID          string
-		Name        string
-		Description string
-		Price       float64
-	}
-
-	GetProduct struct {
-		ID string
-	}
-
-	UpdateProduct struct {
-		ID          string
-		Name        string
-		Description string
-		Price       float64
-	}
-
-	DeleteProduct struct {
-		ID string
-	}
-
 	ServiceUsecase interface {
-		CreateProduct(context.Context, CreateProduct) error
-		GetProduct(context.Context, GetProduct) (*domain.Product, error)
-		UpdateProduct(context.Context, UpdateProduct) error
-		DeleteProduct(context.Context, DeleteProduct) error
+		Commands
+		Queries
+	}
+
+	Commands interface {
+		CreateProduct(context.Context, commands.CreateProduct) error
+		UpdateProduct(context.Context, commands.UpdateProduct) error
+		DeleteProduct(context.Context, commands.DeleteProduct) error
+	}
+
+	Queries interface {
+		GetProduct(context.Context, queries.GetProduct) (*domain.Product, error)
+	}
+
+	usecaseCommands struct {
+		commands.CreateProductHandler
+		commands.UpdateProductHandler
+		commands.DeleteProductHandler
+	}
+
+	usecaseQueries struct {
+		queries.GetProductHandler
 	}
 
 	serviceUsecase struct {
-		product domain.ProductRepository
+		usecaseCommands
+		usecaseQueries
 	}
 )
 
@@ -46,34 +46,15 @@ var _ ServiceUsecase = (*serviceUsecase)(nil)
 
 var UseCaseSet = wire.NewSet(NewService)
 
-func NewService(repo domain.ProductRepository) ServiceUsecase {
+func NewService(repo domain.ProductRepository, domainPublisher ddd.EventPublisher) ServiceUsecase {
 	return &serviceUsecase{
-		product: repo,
+		usecaseCommands: usecaseCommands{
+			CreateProductHandler: commands.NewCreateProductHandler(repo, domainPublisher),
+			UpdateProductHandler: commands.NewUpdateProductHandler(repo, domainPublisher),
+			DeleteProductHandler: commands.NewDeleteProductHandler(repo, domainPublisher),
+		},
+		usecaseQueries: usecaseQueries{
+			GetProductHandler: queries.NewGetProductHandler(repo),
+		},
 	}
-}
-
-func (a *serviceUsecase) CreateProduct(ctx context.Context, create CreateProduct) error {
-	product, err := domain.CreateProduct(create.ID, create.Name, create.Description, create.Price)
-	if err != nil {
-		return err
-	}
-
-	return a.product.Save(ctx, product)
-}
-
-func (a *serviceUsecase) GetProduct(ctx context.Context, get GetProduct) (*domain.Product, error) {
-	return a.product.Find(ctx, get.ID)
-}
-
-func (a *serviceUsecase) UpdateProduct(ctx context.Context, update UpdateProduct) error {
-	product, err := domain.UpdateProduct(update.ID, update.Name, update.Description, update.Price)
-	if err != nil {
-		return err
-	}
-
-	return a.product.Update(ctx, product)
-}
-
-func (a *serviceUsecase) DeleteProduct(ctx context.Context, delete DeleteProduct) error {
-	return a.product.Delete(ctx, delete.ID)
 }

@@ -4,6 +4,8 @@ import (
 	"context"
 	"shopping/product/internal/domain"
 	"shopping/product/internal/usecase"
+	"shopping/product/internal/usecase/commands"
+	"shopping/product/internal/usecase/queries"
 
 	"github.com/google/wire"
 	"github.com/rs/zerolog"
@@ -25,25 +27,25 @@ func LogApplicationAccess(application usecase.ServiceUsecase, logger zerolog.Log
 	}
 }
 
-func (a Usecase) CreateProduct(ctx context.Context, create usecase.CreateProduct) (err error) {
+func (a Usecase) CreateProduct(ctx context.Context, create commands.CreateProduct) (err error) {
 	a.logger.Info().Msg("--> Product.CreateProduct")
 	defer func() { a.logger.Info().Err(err).Msg("<-- Product.CreateProduct") }()
 	return a.ServiceUsecase.CreateProduct(ctx, create)
 }
 
-func (a Usecase) GetProduct(ctx context.Context, get usecase.GetProduct) (product *domain.Product, err error) {
+func (a Usecase) GetProduct(ctx context.Context, get queries.GetProduct) (product *domain.Product, err error) {
 	a.logger.Info().Msg("--> Product.GetProduct")
 	defer func() { a.logger.Info().Err(err).Msg("<-- Product.GetProduct") }()
 	return a.ServiceUsecase.GetProduct(ctx, get)
 }
 
-func (a Usecase) UpdateProduct(ctx context.Context, update usecase.UpdateProduct) (err error) {
+func (a Usecase) UpdateProduct(ctx context.Context, update commands.UpdateProduct) (err error) {
 	a.logger.Info().Msg("--> Product.UpdateProduct")
 	defer func() { a.logger.Info().Err(err).Msg("<-- Product.UpdateProduct") }()
 	return a.ServiceUsecase.UpdateProduct(ctx, update)
 }
 
-func (a Usecase) DeleteProduct(ctx context.Context, delete usecase.DeleteProduct) (err error) {
+func (a Usecase) DeleteProduct(ctx context.Context, delete commands.DeleteProduct) (err error) {
 	a.logger.Info().Msg("--> Product.DeleteProduct")
 	defer func() { a.logger.Info().Err(err).Msg("<-- Product.DeleteProduct") }()
 	return a.ServiceUsecase.DeleteProduct(ctx, delete)

@@ -10,6 +10,7 @@ import (
 	"database/sql"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
+	"shopping/internal/ddd"
 	"shopping/product/internal/application/router/grpc"
 	"shopping/product/internal/infra/repo"
 	"shopping/product/internal/logging"
@@ -18,9 +19,9 @@ import (
 
 // Injectors from wire.go:
 
-func InitApp(tableName string, db *sql.DB, rpc *grpc.Server, logger zerolog.Logger) error {
+func InitApp(tableName string, db *sql.DB, rpc *grpc.Server, logger zerolog.Logger, domainPublisher ddd.EventPublisher) error {
 	productRepository := repo.NewProductRepository(tableName, db)
-	serviceUsecase := usecase.NewService(productRepository)
+	serviceUsecase := usecase.NewService(productRepository, domainPublisher)
 	loggingUsecase := logging.LogApplicationAccess(serviceUsecase, logger)
 	error2 := router.RegisterServer(loggingUsecase, rpc)
 	return error2

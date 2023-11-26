@@ -39,7 +39,13 @@ func (a Usecase) CancelOrder(ctx context.Context, cmd commands.CancelOrder) (err
 	return a.ServiceUsecase.CancelOrder(ctx, cmd)
 }
 
-func (a Usecase) ReadyOrder(ctx context.Context, cmd commands.ReadyOrder) (paymentID string, err error) {
+func (a Usecase) CheckoutOrder(ctx context.Context, cmd commands.CheckoutOrder) (err error) {
+	a.logger.Info().Msg("--> Ordering.CheckoutOrder")
+	defer func() { a.logger.Info().Err(err).Msg("<-- Ordering.CheckoutOrder") }()
+	return a.ServiceUsecase.CheckoutOrder(ctx, cmd)
+}
+
+func (a Usecase) ReadyOrder(ctx context.Context, cmd commands.ReadyOrder) (err error) {
 	a.logger.Info().Msg("--> Ordering.ReadyOrder")
 	defer func() { a.logger.Info().Err(err).Msg("<-- Ordering.ReadyOrder") }()
 	return a.ServiceUsecase.ReadyOrder(ctx, cmd)

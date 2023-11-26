@@ -46,18 +46,18 @@ func (r PaymentRepository) Find(ctx context.Context, invoiceID string) (*domain.
 	return invoice, err
 }
 
-func (r PaymentRepository) Update(ctx context.Context, id, status string) error {
+func (r PaymentRepository) Update(ctx context.Context, invoice *domain.Invoice) error {
 	const query = "UPDATE %s SET status = $1 WHERE id = $2"
 
-	_, err := r.db.ExecContext(ctx, r.table(query), status, id)
+	_, err := r.db.ExecContext(ctx, r.table(query), invoice.Status.String(), invoice.ID)
 
 	return err
 }
 
-func (r PaymentRepository) Delete(ctx context.Context, invoiceID string) error {
+func (r PaymentRepository) Delete(ctx context.Context, invoice *domain.Invoice) error {
 	const query = "DELETE FROM %s WHERE id = $1"
 
-	_, err := r.db.ExecContext(ctx, r.table(query), invoiceID)
+	_, err := r.db.ExecContext(ctx, r.table(query), invoice.ID)
 
 	return err
 }

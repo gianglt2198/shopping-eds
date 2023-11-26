@@ -1,11 +1,13 @@
 package domain
 
 import (
+	"shopping/internal/ddd"
+
 	"github.com/stackus/errors"
 )
 
 type Product struct {
-	ID          string
+	ddd.AggregateBase
 	Name        string
 	Description string
 	Price       float64
@@ -24,24 +26,33 @@ func CreateProduct(id, name, description string, price float64) (*Product, error
 		return nil, errors.Wrap(errors.ErrBadRequest, "the price cannot be blank")
 	}
 
-	return &Product{
-		ID:          id,
+	product := &Product{
+		AggregateBase: ddd.AggregateBase{
+			ID: id,
+		},
 		Name:        name,
 		Price:       price,
 		Description: description,
-	}, nil
-}
-
-func UpdateProduct(id, name, description string, price float64) (*Product, error) {
-	if id == "" {
-		return nil, errors.Wrap(errors.ErrBadRequest, "the product id cannot be blank")
 	}
 
-	return &Product{
-		ID:          id,
-		Name:        name,
-		Price:       price,
-		Description: description,
-	}, nil
+	product.AddEvents(&ProductCreated{
+		Product: product,
+	})
 
+	return product, nil
+}
+
+func (p *Product) Update() error {
+
+	p.AddEvents(&ProductUpdated{Product: p})
+
+	return nil
+}
+
+func (p *Product) Delete() error {
+	p.AddEvents(&ProductDeleted{
+		Product: p,
+	})
+
+	return nil
 }

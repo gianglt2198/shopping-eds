@@ -23,6 +23,7 @@ const (
 	OrderingService_GetOrder_FullMethodName      = "/orderpb.OrderingService/GetOrder"
 	OrderingService_AddItem_FullMethodName       = "/orderpb.OrderingService/AddItem"
 	OrderingService_CancelOrder_FullMethodName   = "/orderpb.OrderingService/CancelOrder"
+	OrderingService_CheckoutOrder_FullMethodName = "/orderpb.OrderingService/CheckoutOrder"
 	OrderingService_ReadyOrder_FullMethodName    = "/orderpb.OrderingService/ReadyOrder"
 	OrderingService_CompleteOrder_FullMethodName = "/orderpb.OrderingService/CompleteOrder"
 )
@@ -35,6 +36,7 @@ type OrderingServiceClient interface {
 	GetOrder(ctx context.Context, in *GetOrderRequest, opts ...grpc.CallOption) (*GetOrderResponse, error)
 	AddItem(ctx context.Context, in *AddItemRequest, opts ...grpc.CallOption) (*AddItemResponse, error)
 	CancelOrder(ctx context.Context, in *CancelOrderRequest, opts ...grpc.CallOption) (*CancelOrderResponse, error)
+	CheckoutOrder(ctx context.Context, in *CheckoutOrderRequest, opts ...grpc.CallOption) (*CheckoutOrderResponse, error)
 	ReadyOrder(ctx context.Context, in *ReadyOrderRequest, opts ...grpc.CallOption) (*ReadyOrderResponse, error)
 	CompleteOrder(ctx context.Context, in *CompleteOrderRequest, opts ...grpc.CallOption) (*CompleteOrderResponse, error)
 }
@@ -83,6 +85,15 @@ func (c *orderingServiceClient) CancelOrder(ctx context.Context, in *CancelOrder
 	return out, nil
 }
 
+func (c *orderingServiceClient) CheckoutOrder(ctx context.Context, in *CheckoutOrderRequest, opts ...grpc.CallOption) (*CheckoutOrderResponse, error) {
+	out := new(CheckoutOrderResponse)
+	err := c.cc.Invoke(ctx, OrderingService_CheckoutOrder_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *orderingServiceClient) ReadyOrder(ctx context.Context, in *ReadyOrderRequest, opts ...grpc.CallOption) (*ReadyOrderResponse, error) {
 	out := new(ReadyOrderResponse)
 	err := c.cc.Invoke(ctx, OrderingService_ReadyOrder_FullMethodName, in, out, opts...)
@@ -109,6 +120,7 @@ type OrderingServiceServer interface {
 	GetOrder(context.Context, *GetOrderRequest) (*GetOrderResponse, error)
 	AddItem(context.Context, *AddItemRequest) (*AddItemResponse, error)
 	CancelOrder(context.Context, *CancelOrderRequest) (*CancelOrderResponse, error)
+	CheckoutOrder(context.Context, *CheckoutOrderRequest) (*CheckoutOrderResponse, error)
 	ReadyOrder(context.Context, *ReadyOrderRequest) (*ReadyOrderResponse, error)
 	CompleteOrder(context.Context, *CompleteOrderRequest) (*CompleteOrderResponse, error)
 }
@@ -128,6 +140,9 @@ func (UnimplementedOrderingServiceServer) AddItem(context.Context, *AddItemReque
 }
 func (UnimplementedOrderingServiceServer) CancelOrder(context.Context, *CancelOrderRequest) (*CancelOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CancelOrder not implemented")
+}
+func (UnimplementedOrderingServiceServer) CheckoutOrder(context.Context, *CheckoutOrderRequest) (*CheckoutOrderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckoutOrder not implemented")
 }
 func (UnimplementedOrderingServiceServer) ReadyOrder(context.Context, *ReadyOrderRequest) (*ReadyOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadyOrder not implemented")
@@ -219,6 +234,24 @@ func _OrderingService_CancelOrder_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderingService_CheckoutOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckoutOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderingServiceServer).CheckoutOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderingService_CheckoutOrder_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderingServiceServer).CheckoutOrder(ctx, req.(*CheckoutOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _OrderingService_ReadyOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReadyOrderRequest)
 	if err := dec(in); err != nil {
@@ -277,6 +310,10 @@ var OrderingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CancelOrder",
 			Handler:    _OrderingService_CancelOrder_Handler,
+		},
+		{
+			MethodName: "CheckoutOrder",
+			Handler:    _OrderingService_CheckoutOrder_Handler,
 		},
 		{
 			MethodName: "ReadyOrder",

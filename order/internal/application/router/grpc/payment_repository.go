@@ -21,6 +21,11 @@ func NewPaymentRepository(conn *grpc.ClientConn) domain.PaymentRepository {
 	return PaymentRepository{client: paymentspb.NewPaymentsServiceClient(conn)}
 }
 
+func (r PaymentRepository) GetInvoice(ctx context.Context, paymentID string) error {
+	_, err := r.client.GetInvoice(ctx, &paymentspb.GetInvoiceRequest{Id: paymentID})
+	return err
+}
+
 func (r PaymentRepository) CancelInvoice(ctx context.Context, paymentID string) error {
 	_, err := r.client.CancelInvoice(ctx, &paymentspb.CancelInvoiceRequest{Id: paymentID})
 	return err

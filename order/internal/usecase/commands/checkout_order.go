@@ -8,38 +8,33 @@ import (
 	"github.com/google/wire"
 )
 
-type ReadyOrder struct {
-	ID        string
-	PaymentID string
+type CheckoutOrder struct {
+	ID string
 }
 
-type ReadyOrderHandler struct {
+type CheckoutOrderHandler struct {
 	orders          domain.OrderRepository
 	payments        domain.PaymentRepository
 	domainPublisher ddd.EventPublisher
 }
 
-var ReadyOrderUseCaseSet = wire.NewSet(NewReadyOrderHandler)
+var CheckoutOrderUseCaseSet = wire.NewSet(NewCheckoutOrderHandler)
 
-func NewReadyOrderHandler(orders domain.OrderRepository, payments domain.PaymentRepository, domainPublisher ddd.EventPublisher) ReadyOrderHandler {
-	return ReadyOrderHandler{
+func NewCheckoutOrderHandler(orders domain.OrderRepository, payments domain.PaymentRepository, domainPublisher ddd.EventPublisher) CheckoutOrderHandler {
+	return CheckoutOrderHandler{
 		orders:          orders,
 		payments:        payments,
 		domainPublisher: domainPublisher,
 	}
 }
 
-func (h ReadyOrderHandler) ReadyOrder(ctx context.Context, cmd ReadyOrder) error {
+func (h CheckoutOrderHandler) CheckoutOrder(ctx context.Context, cmd CheckoutOrder) error {
 	order, err := h.orders.Find(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
 
-	if err := h.payments.GetInvoice(ctx, cmd.PaymentID); err != nil {
-		return err
-	}
-
-	if err = order.Ready(cmd.PaymentID); err != nil {
+	if err = order.Checkout(); err != nil {
 		return nil
 	}
 
