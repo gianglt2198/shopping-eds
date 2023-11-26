@@ -3,16 +3,17 @@ package domain
 type OrderStatus string
 
 const (
-	OrderUnknown   OrderStatus = ""
-	OrderPending   OrderStatus = "pending"
-	OrderReady     OrderStatus = "ready"
-	OrderCompleted OrderStatus = "completed"
-	OrderCancelled OrderStatus = "cancelled"
+	OrderUnknown          OrderStatus = ""
+	OrderStatusPending    OrderStatus = "pending"
+	OrderStatusCheckedout OrderStatus = "checkedout"
+	OrderStatusReady      OrderStatus = "ready"
+	OrderStatusCompleted  OrderStatus = "completed"
+	OrderStatusCancelled  OrderStatus = "cancelled"
 )
 
 func (s OrderStatus) String() string {
 	switch s {
-	case OrderPending, OrderReady, OrderCompleted, OrderCancelled:
+	case OrderStatusPending, OrderStatusCheckedout, OrderStatusReady, OrderStatusCompleted, OrderStatusCancelled:
 		return string(s)
 	default:
 		return ""
@@ -21,14 +22,16 @@ func (s OrderStatus) String() string {
 
 func ToOrderStatus(status string) OrderStatus {
 	switch status {
-	case OrderPending.String():
-		return OrderPending
-	case OrderReady.String():
-		return OrderReady
-	case OrderCancelled.String():
-		return OrderCancelled
-	case OrderCompleted.String():
-		return OrderCompleted
+	case OrderStatusPending.String():
+		return OrderStatusPending
+	case OrderStatusCheckedout.String():
+		return OrderStatusCheckedout
+	case OrderStatusReady.String():
+		return OrderStatusReady
+	case OrderStatusCancelled.String():
+		return OrderStatusCancelled
+	case OrderStatusCompleted.String():
+		return OrderStatusCompleted
 	default:
 		return OrderUnknown
 	}

@@ -78,6 +78,38 @@
         ]
       }
     },
+    "/api/order/checkout": {
+      "post": {
+        "operationId": "OrderingService_CheckoutOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orderpbCheckoutOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/orderpbCheckoutOrderRequest"
+            }
+          }
+        ],
+        "tags": [
+          "OrderingService"
+        ]
+      }
+    },
     "/api/order/complete": {
       "post": {
         "operationId": "OrderingService_CompleteOrder",
@@ -224,12 +256,7 @@
       }
     },
     "orderpbAddItemResponse": {
-      "type": "object",
-      "properties": {
-        "statusCode": {
-          "type": "string"
-        }
-      }
+      "type": "object"
     },
     "orderpbCancelOrderRequest": {
       "type": "object",
@@ -240,14 +267,9 @@
       }
     },
     "orderpbCancelOrderResponse": {
-      "type": "object",
-      "properties": {
-        "statusCode": {
-          "type": "string"
-        }
-      }
+      "type": "object"
     },
-    "orderpbCompleteOrderRequest": {
+    "orderpbCheckoutOrderRequest": {
       "type": "object",
       "properties": {
         "id": {
@@ -255,13 +277,22 @@
         }
       }
     },
-    "orderpbCompleteOrderResponse": {
+    "orderpbCheckoutOrderResponse": {
+      "type": "object"
+    },
+    "orderpbCompleteOrderRequest": {
       "type": "object",
       "properties": {
-        "statusCode": {
+        "id": {
+          "type": "string"
+        },
+        "paymentId": {
           "type": "string"
         }
       }
+    },
+    "orderpbCompleteOrderResponse": {
+      "type": "object"
     },
     "orderpbCreateOrderRequest": {
       "type": "object",
@@ -281,9 +312,6 @@
     "orderpbCreateOrderResponse": {
       "type": "object",
       "properties": {
-        "statusCode": {
-          "type": "string"
-        },
         "id": {
           "type": "string"
         }
@@ -292,9 +320,6 @@
     "orderpbGetOrderResponse": {
       "type": "object",
       "properties": {
-        "statusCode": {
-          "type": "string"
-        },
         "order": {
           "$ref": "#/definitions/orderpbOrder"
         }
@@ -347,19 +372,14 @@
       "properties": {
         "id": {
           "type": "string"
-        }
-      }
-    },
-    "orderpbReadyOrderResponse": {
-      "type": "object",
-      "properties": {
-        "statusCode": {
-          "type": "string"
         },
         "paymentId": {
           "type": "string"
         }
       }
+    },
+    "orderpbReadyOrderResponse": {
+      "type": "object"
     },
     "protobufAny": {
       "type": "object",

@@ -5,6 +5,8 @@ import (
 	"shopping/product/internal/domain"
 	"shopping/product/internal/logging"
 	"shopping/product/internal/usecase"
+	"shopping/product/internal/usecase/commands"
+	"shopping/product/internal/usecase/queries"
 	"shopping/product/pb"
 
 	"github.com/google/uuid"
@@ -28,7 +30,7 @@ func RegisterServer(app logging.Usecase, registrar *grpc.Server) error {
 
 func (s server) CreateProduct(ctx context.Context, request *pb.CreateProductRequest) (*pb.CreateProductResponse, error) {
 	id := uuid.New().String()
-	err := s.app.CreateProduct(ctx, usecase.CreateProduct{
+	err := s.app.CreateProduct(ctx, commands.CreateProduct{
 		ID:          id,
 		Name:        request.GetName(),
 		Price:       request.GetPrice(),
@@ -38,7 +40,7 @@ func (s server) CreateProduct(ctx context.Context, request *pb.CreateProductRequ
 }
 
 func (s server) GetProduct(ctx context.Context, request *pb.GetProductRequest) (*pb.GetProductResponse, error) {
-	product, err := s.app.GetProduct(ctx, usecase.GetProduct{
+	product, err := s.app.GetProduct(ctx, queries.GetProduct{
 		ID: request.GetId(),
 	})
 	return &pb.GetProductResponse{Product: s.productFromDomain(product)}, err
@@ -54,7 +56,7 @@ func (s server) productFromDomain(product *domain.Product) *pb.Product {
 }
 
 func (s server) UpdateProduct(ctx context.Context, request *pb.UpdateProductRequest) (*pb.UpdateProductResponse, error) {
-	err := s.app.UpdateProduct(ctx, usecase.UpdateProduct{
+	err := s.app.UpdateProduct(ctx, commands.UpdateProduct{
 		ID:          request.GetId(),
 		Name:        request.GetName(),
 		Price:       request.GetPrice(),
@@ -64,7 +66,7 @@ func (s server) UpdateProduct(ctx context.Context, request *pb.UpdateProductRequ
 }
 
 func (s server) DeleteProduct(ctx context.Context, request *pb.DeleteProductRequest) (*pb.DeleteProductResponse, error) {
-	err := s.app.DeleteProduct(ctx, usecase.DeleteProduct{
+	err := s.app.DeleteProduct(ctx, commands.DeleteProduct{
 		ID: request.GetId(),
 	})
 	return &pb.DeleteProductResponse{}, err

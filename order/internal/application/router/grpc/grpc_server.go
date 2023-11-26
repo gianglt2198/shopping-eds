@@ -86,10 +86,6 @@ func (s server) AddItem(ctx context.Context, request *pb.AddItemRequest) (*pb.Ad
 	return &pb.AddItemResponse{}, err
 }
 
-// func (s server) RemoveItem(ctx context.Context, request *pb.RemoveItemRequest) (*pb.RemoveItemResponse, error) {
-
-// }
-
 func (s server) CancelOrder(ctx context.Context, request *pb.CancelOrderRequest) (*pb.CancelOrderResponse, error) {
 	err := s.app.CancelOrder(ctx, commands.CancelOrder{
 		ID: request.GetId(),
@@ -97,11 +93,19 @@ func (s server) CancelOrder(ctx context.Context, request *pb.CancelOrderRequest)
 	return &pb.CancelOrderResponse{}, err
 }
 
-func (s server) ReadyOrder(ctx context.Context, request *pb.ReadyOrderRequest) (*pb.ReadyOrderResponse, error) {
-	paymentID, err := s.app.ReadyOrder(ctx, commands.ReadyOrder{
+func (s server) CheckoutOrder(ctx context.Context, request *pb.CheckoutOrderRequest) (*pb.CheckoutOrderResponse, error) {
+	err := s.app.CheckoutOrder(ctx, commands.CheckoutOrder{
 		ID: request.GetId(),
 	})
-	return &pb.ReadyOrderResponse{PaymentId: paymentID}, err
+	return &pb.CheckoutOrderResponse{}, err
+}
+
+func (s server) ReadyOrder(ctx context.Context, request *pb.ReadyOrderRequest) (*pb.ReadyOrderResponse, error) {
+	err := s.app.ReadyOrder(ctx, commands.ReadyOrder{
+		ID:        request.GetId(),
+		PaymentID: request.GetPaymentId(),
+	})
+	return &pb.ReadyOrderResponse{}, err
 }
 
 func (s server) CompleteOrder(ctx context.Context, request *pb.CompleteOrderRequest) (*pb.CompleteOrderResponse, error) {

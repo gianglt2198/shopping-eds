@@ -28,6 +28,12 @@ service OrderingService {
             body: "*"
         };
     };
+    rpc CheckoutOrder(CheckoutOrderRequest) returns (CheckoutOrderResponse) {
+        option (google.api.http) = {
+            post: "/api/order/checkout",
+            body: "*"
+        };
+    }
     rpc ReadyOrder(ReadyOrderRequest) returns (ReadyOrderResponse) {
         option (google.api.http) = {
             post: "/api/order/ready",
@@ -64,7 +70,6 @@ message CreateOrderRequest {
 }
 
 message CreateOrderResponse {
-    string status_code = 1;
     string id = 2;
 }
 
@@ -73,8 +78,7 @@ message GetOrderRequest {
 }
 
 message GetOrderResponse {
-    string status_code = 1;
-    Order order = 2;
+    Order order = 1;
 }
 
 message AddItemRequest {
@@ -83,31 +87,30 @@ message AddItemRequest {
     int32 quantity = 4;
 }
   
-message AddItemResponse {
-    string status_code = 1;
-}
+message AddItemResponse {}
   
 message CancelOrderRequest {
     string id = 1;
 }
 
-message CancelOrderResponse {
-    string status_code = 1;
+message CancelOrderResponse {}
+
+message CheckoutOrderRequest {
+    string id = 1;
 }
+
+message CheckoutOrderResponse {}
 
 message ReadyOrderRequest {
     string id = 1;
-}
-
-message ReadyOrderResponse {
-    string status_code = 1;
     string payment_id = 2;
 }
 
+message ReadyOrderResponse {}
+
 message CompleteOrderRequest {
     string id = 1;
+    string payment_id = 2;
 }
 
-message CompleteOrderResponse {
-    string status_code = 1;
-}
+message CompleteOrderResponse {}

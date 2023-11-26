@@ -52,12 +52,20 @@ func NewService(repo domain.PaymentRepository, orders domain.OrderRepository) Se
 }
 
 func (a *serviceUsecase) CreateInvoice(ctx context.Context, create CreateInvoice) error {
-	customer, err := domain.CreateInvoice(create.ID, create.OrderID, create.CustomerID, create.Amount)
+	invoice, err := domain.CreateInvoice(create.ID, create.OrderID, create.CustomerID, create.Amount)
 	if err != nil {
 		return err
 	}
 
-	return a.payments.Save(ctx, customer)
+	if err := a.payments.Save(ctx, invoice); err != nil {
+		return err
+	}
+
+	if err := a.orders.ReadyOrder(ctx, invoice.OrderID, invoice.ID); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a *serviceUsecase) GetInvoice(ctx context.Context, get GetInvoice) (*domain.Invoice, error) {
@@ -71,13 +79,26 @@ func (a *serviceUsecase) PayInvoice(ctx context.Context, update PayInvoice) erro
 		return err
 	}
 
+	if err = payment.Pay(); err != nil {
+		return err
+	}
+
 	if err := a.orders.CompleteOrder(ctx, payment.OrderID); err != nil {
 		return err
 	}
 
-	return a.payments.Update(ctx, update.ID, domain.PaymentPaid.String())
+	return a.payments.Update(ctx, payment)
 }
 
 func (a *serviceUsecase) CancelInvoice(ctx context.Context, delete CancelInvoice) error {
-	return a.payments.Delete(ctx, delete.ID)
+	payment, err := a.payments.Find(ctx, delete.ID)
+	if err != nil {
+		return err
+	}
+
+	if err = payment.Cancel(); err != nil {
+		return err
+	}
+
+	return a.payments.Update(ctx, payment)
 }

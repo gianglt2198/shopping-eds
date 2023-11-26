@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"shopping/internal/ddd"
+
 	"github.com/stackus/errors"
 )
 
@@ -13,7 +15,7 @@ var (
 
 type (
 	Order struct {
-		ID         string
+		ddd.AggregateBase
 		CustomerID string
 		PaymentID  string
 		Status     OrderStatus
@@ -43,35 +45,60 @@ func CreateOrder(id, customerID, paymentID string, items []*Item) (*Order, error
 	}
 
 	order := &Order{
-		ID:         id,
+		AggregateBase: ddd.AggregateBase{
+			ID: id,
+		},
 		CustomerID: customerID,
 		PaymentID:  paymentID,
 		Items:      orderItems,
-		Status:     OrderPending,
+		Status:     OrderStatusPending,
 	}
+
+	order.AddEvents(&OrderCreated{
+		Order: order,
+	})
 
 	return order, nil
 }
 
 func (o *Order) Cancel() error {
-	if o.Status != OrderPending {
+	if o.Status != OrderStatusPending && o.Status != OrderStatusCheckedout && o.Status != OrderStatusReady {
 		return ErrOrderCannotBeCancelled
 	}
 
-	o.Status = OrderCancelled
+	o.Status = OrderStatusCancelled
+
+	o.AddEvents(&OrderCancelled{
+		Order: o,
+	})
 
 	return nil
 }
 
-func (o *Order) Ready() error {
-	o.Status = OrderReady
+func (o *Order) Checkout() error {
+	o.Status = OrderStatusCheckedout
 
+	o.AddEvents(&OrderCheckedout{
+		Order: o,
+	})
+	return nil
+}
+
+func (o *Order) Ready(paymentID string) error {
+	o.Status = OrderStatusReady
+	o.PaymentID = paymentID
+
+	o.AddEvents(&OrderReadied{
+		Order: o,
+	})
 	return nil
 }
 
 func (o *Order) Complete() error {
-	o.Status = OrderCompleted
-
+	o.Status = OrderStatusCompleted
+	o.AddEvents(&OrderCompleted{
+		Order: o,
+	})
 	return nil
 }
 
@@ -97,6 +124,10 @@ func (o *Order) AddItem(product *Product, quantity int32) error {
 		Price:       product.Price,
 		Quantity:    quantity,
 	}
+
+	o.AddEvents(&OrderAddedItem{
+		Order: o,
+	})
 
 	return nil
 }

@@ -37,3 +37,15 @@ func CreateInvoice(id, orderID, customerID string, amount float64) (*Invoice, er
 		Status:     PaymentPending,
 	}, nil
 }
+
+func (o *Invoice) Cancel() error {
+	o.Status = PaymentCancelled
+
+	return nil
+}
+
+func (o *Invoice) Pay() error {
+	o.Status = PaymentPaid
+
+	return nil
+}
