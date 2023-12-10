@@ -21,8 +21,9 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	ProductsService_GetProduct_FullMethodName    = "/productpb.ProductsService/GetProduct"
 	ProductsService_CreateProduct_FullMethodName = "/productpb.ProductsService/CreateProduct"
-	ProductsService_UpdateProduct_FullMethodName = "/productpb.ProductsService/UpdateProduct"
 	ProductsService_DeleteProduct_FullMethodName = "/productpb.ProductsService/DeleteProduct"
+	ProductsService_IncreasePrice_FullMethodName = "/productpb.ProductsService/IncreasePrice"
+	ProductsService_DecreasePrice_FullMethodName = "/productpb.ProductsService/DecreasePrice"
 )
 
 // ProductsServiceClient is the client API for ProductsService service.
@@ -31,8 +32,9 @@ const (
 type ProductsServiceClient interface {
 	GetProduct(ctx context.Context, in *GetProductRequest, opts ...grpc.CallOption) (*GetProductResponse, error)
 	CreateProduct(ctx context.Context, in *CreateProductRequest, opts ...grpc.CallOption) (*CreateProductResponse, error)
-	UpdateProduct(ctx context.Context, in *UpdateProductRequest, opts ...grpc.CallOption) (*UpdateProductResponse, error)
 	DeleteProduct(ctx context.Context, in *DeleteProductRequest, opts ...grpc.CallOption) (*DeleteProductResponse, error)
+	IncreasePrice(ctx context.Context, in *IncreasePriceRequest, opts ...grpc.CallOption) (*IncreasePriceResponse, error)
+	DecreasePrice(ctx context.Context, in *DecreasePriceRequest, opts ...grpc.CallOption) (*DecreasePriceResponse, error)
 }
 
 type productsServiceClient struct {
@@ -61,18 +63,27 @@ func (c *productsServiceClient) CreateProduct(ctx context.Context, in *CreatePro
 	return out, nil
 }
 
-func (c *productsServiceClient) UpdateProduct(ctx context.Context, in *UpdateProductRequest, opts ...grpc.CallOption) (*UpdateProductResponse, error) {
-	out := new(UpdateProductResponse)
-	err := c.cc.Invoke(ctx, ProductsService_UpdateProduct_FullMethodName, in, out, opts...)
+func (c *productsServiceClient) DeleteProduct(ctx context.Context, in *DeleteProductRequest, opts ...grpc.CallOption) (*DeleteProductResponse, error) {
+	out := new(DeleteProductResponse)
+	err := c.cc.Invoke(ctx, ProductsService_DeleteProduct_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *productsServiceClient) DeleteProduct(ctx context.Context, in *DeleteProductRequest, opts ...grpc.CallOption) (*DeleteProductResponse, error) {
-	out := new(DeleteProductResponse)
-	err := c.cc.Invoke(ctx, ProductsService_DeleteProduct_FullMethodName, in, out, opts...)
+func (c *productsServiceClient) IncreasePrice(ctx context.Context, in *IncreasePriceRequest, opts ...grpc.CallOption) (*IncreasePriceResponse, error) {
+	out := new(IncreasePriceResponse)
+	err := c.cc.Invoke(ctx, ProductsService_IncreasePrice_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *productsServiceClient) DecreasePrice(ctx context.Context, in *DecreasePriceRequest, opts ...grpc.CallOption) (*DecreasePriceResponse, error) {
+	out := new(DecreasePriceResponse)
+	err := c.cc.Invoke(ctx, ProductsService_DecreasePrice_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -85,8 +96,9 @@ func (c *productsServiceClient) DeleteProduct(ctx context.Context, in *DeletePro
 type ProductsServiceServer interface {
 	GetProduct(context.Context, *GetProductRequest) (*GetProductResponse, error)
 	CreateProduct(context.Context, *CreateProductRequest) (*CreateProductResponse, error)
-	UpdateProduct(context.Context, *UpdateProductRequest) (*UpdateProductResponse, error)
 	DeleteProduct(context.Context, *DeleteProductRequest) (*DeleteProductResponse, error)
+	IncreasePrice(context.Context, *IncreasePriceRequest) (*IncreasePriceResponse, error)
+	DecreasePrice(context.Context, *DecreasePriceRequest) (*DecreasePriceResponse, error)
 }
 
 // UnimplementedProductsServiceServer should be embedded to have forward compatible implementations.
@@ -99,11 +111,14 @@ func (UnimplementedProductsServiceServer) GetProduct(context.Context, *GetProduc
 func (UnimplementedProductsServiceServer) CreateProduct(context.Context, *CreateProductRequest) (*CreateProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateProduct not implemented")
 }
-func (UnimplementedProductsServiceServer) UpdateProduct(context.Context, *UpdateProductRequest) (*UpdateProductResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateProduct not implemented")
-}
 func (UnimplementedProductsServiceServer) DeleteProduct(context.Context, *DeleteProductRequest) (*DeleteProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProduct not implemented")
+}
+func (UnimplementedProductsServiceServer) IncreasePrice(context.Context, *IncreasePriceRequest) (*IncreasePriceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IncreasePrice not implemented")
+}
+func (UnimplementedProductsServiceServer) DecreasePrice(context.Context, *DecreasePriceRequest) (*DecreasePriceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DecreasePrice not implemented")
 }
 
 // UnsafeProductsServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -153,24 +168,6 @@ func _ProductsService_CreateProduct_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProductsService_UpdateProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateProductRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProductsServiceServer).UpdateProduct(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProductsService_UpdateProduct_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductsServiceServer).UpdateProduct(ctx, req.(*UpdateProductRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _ProductsService_DeleteProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteProductRequest)
 	if err := dec(in); err != nil {
@@ -185,6 +182,42 @@ func _ProductsService_DeleteProduct_Handler(srv interface{}, ctx context.Context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProductsServiceServer).DeleteProduct(ctx, req.(*DeleteProductRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProductsService_IncreasePrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IncreasePriceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductsServiceServer).IncreasePrice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProductsService_IncreasePrice_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductsServiceServer).IncreasePrice(ctx, req.(*IncreasePriceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProductsService_DecreasePrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DecreasePriceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductsServiceServer).DecreasePrice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProductsService_DecreasePrice_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductsServiceServer).DecreasePrice(ctx, req.(*DecreasePriceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -205,12 +238,16 @@ var ProductsService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ProductsService_CreateProduct_Handler,
 		},
 		{
-			MethodName: "UpdateProduct",
-			Handler:    _ProductsService_UpdateProduct_Handler,
-		},
-		{
 			MethodName: "DeleteProduct",
 			Handler:    _ProductsService_DeleteProduct_Handler,
+		},
+		{
+			MethodName: "IncreasePrice",
+			Handler:    _ProductsService_IncreasePrice_Handler,
+		},
+		{
+			MethodName: "DecreasePrice",
+			Handler:    _ProductsService_DecreasePrice_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

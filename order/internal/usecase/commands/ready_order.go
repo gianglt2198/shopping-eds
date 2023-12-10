@@ -2,10 +2,7 @@ package commands
 
 import (
 	"context"
-	"shopping/internal/ddd"
 	"shopping/order/internal/domain"
-
-	"github.com/google/wire"
 )
 
 type ReadyOrder struct {
@@ -14,23 +11,19 @@ type ReadyOrder struct {
 }
 
 type ReadyOrderHandler struct {
-	orders          domain.OrderRepository
-	payments        domain.PaymentRepository
-	domainPublisher ddd.EventPublisher
+	orders   domain.OrderRepository
+	payments domain.PaymentRepository
 }
 
-var ReadyOrderUseCaseSet = wire.NewSet(NewReadyOrderHandler)
-
-func NewReadyOrderHandler(orders domain.OrderRepository, payments domain.PaymentRepository, domainPublisher ddd.EventPublisher) ReadyOrderHandler {
+func NewReadyOrderHandler(orders domain.OrderRepository, payments domain.PaymentRepository) ReadyOrderHandler {
 	return ReadyOrderHandler{
-		orders:          orders,
-		payments:        payments,
-		domainPublisher: domainPublisher,
+		orders:   orders,
+		payments: payments,
 	}
 }
 
 func (h ReadyOrderHandler) ReadyOrder(ctx context.Context, cmd ReadyOrder) error {
-	order, err := h.orders.Find(ctx, cmd.ID)
+	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
@@ -43,11 +36,7 @@ func (h ReadyOrderHandler) ReadyOrder(ctx context.Context, cmd ReadyOrder) error
 		return nil
 	}
 
-	if err = h.orders.Update(ctx, order); err != nil {
-		return err
-	}
-
-	if err = h.domainPublisher.Publish(ctx, order.GetEvents()...); err != nil {
+	if err = h.orders.Save(ctx, order); err != nil {
 		return err
 	}
 

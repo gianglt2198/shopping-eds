@@ -16,7 +16,7 @@ func (m Module) Startup(ctx context.Context, container container.Container) erro
 		return err
 	}
 
-	application.InitApp("payment", container.DB(), container.RPC(), container.Logger(), conn)
+	application.InitApp("payments.payment", container.DB(), container.RPC(), container.Logger(), conn)
 
 	if err := rest.RegisterGateway(ctx, container.Mux(), container.Config().Rpc.Address()); err != nil {
 		return err

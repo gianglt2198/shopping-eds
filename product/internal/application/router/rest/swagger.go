@@ -1,4 +1,4 @@
-package router
+package rest_router
 
 import (
 	"embed"

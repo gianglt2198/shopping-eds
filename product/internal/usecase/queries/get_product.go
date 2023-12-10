@@ -13,18 +13,18 @@ type (
 	}
 
 	GetProductHandler struct {
-		products domain.ProductRepository
+		management domain.ManagementRepository
 	}
 )
 
 var GetProductUsecaseSet = wire.NewSet(NewGetProductHandler)
 
-func NewGetProductHandler(products domain.ProductRepository) GetProductHandler {
+func NewGetProductHandler(management domain.ManagementRepository) GetProductHandler {
 	return GetProductHandler{
-		products: products,
+		management: management,
 	}
 }
 
-func (h GetProductHandler) GetProduct(ctx context.Context, query GetProduct) (*domain.Product, error) {
-	return h.products.Find(ctx, query.ID)
+func (h GetProductHandler) GetProduct(ctx context.Context, query GetProduct) (*domain.ManagementProduct, error) {
+	return h.management.Find(ctx, query.ID)
 }

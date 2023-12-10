@@ -102,14 +102,16 @@
         "tags": [
           "ProductsService"
         ]
-      },
-      "put": {
-        "operationId": "ProductsService_UpdateProduct",
+      }
+    },
+    "/api/product/price/decrease": {
+      "post": {
+        "operationId": "ProductsService_DecreasePrice",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/productpbUpdateProductResponse"
+              "$ref": "#/definitions/productpbDecreasePriceResponse"
             }
           },
           "default": {
@@ -125,7 +127,39 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/productpbUpdateProductRequest"
+              "$ref": "#/definitions/productpbDecreasePriceRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ProductsService"
+        ]
+      }
+    },
+    "/api/product/price/increase": {
+      "post": {
+        "operationId": "ProductsService_IncreasePrice",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/productpbIncreasePriceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/productpbIncreasePriceRequest"
             }
           }
         ],
@@ -162,6 +196,26 @@
         }
       }
     },
+    "productpbDecreasePriceRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "productpbDecreasePriceResponse": {
+      "type": "object",
+      "properties": {
+        "statusCode": {
+          "type": "string"
+        }
+      }
+    },
     "productpbDeleteProductResponse": {
       "type": "object",
       "properties": {
@@ -181,6 +235,26 @@
         }
       }
     },
+    "productpbIncreasePriceRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "productpbIncreasePriceResponse": {
+      "type": "object",
+      "properties": {
+        "statusCode": {
+          "type": "string"
+        }
+      }
+    },
     "productpbProduct": {
       "type": "object",
       "properties": {
@@ -196,32 +270,6 @@
         "price": {
           "type": "number",
           "format": "double"
-        }
-      }
-    },
-    "productpbUpdateProductRequest": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "price": {
-          "type": "number",
-          "format": "double"
-        }
-      }
-    },
-    "productpbUpdateProductResponse": {
-      "type": "object",
-      "properties": {
-        "statusCode": {
-          "type": "string"
         }
       }
     },

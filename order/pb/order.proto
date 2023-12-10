@@ -52,7 +52,7 @@ message Order {
     string id = 1;
     string customer_id = 2;
     string payment_id = 3;
-    map<string, Item> items = 4;
+    repeated Item items = 4;
     string status = 5;
 }
 
@@ -65,8 +65,7 @@ message Item {
   
 
 message CreateOrderRequest {
-    repeated Item items = 1;
-    string customer_id = 2;
+    string customer_id = 1;
 }
 
 message CreateOrderResponse {

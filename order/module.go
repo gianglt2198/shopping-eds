@@ -3,49 +3,102 @@ package customer
 import (
 	"context"
 	"shopping/internal/container"
+	"shopping/internal/db"
 	"shopping/internal/ddd"
-	router "shopping/order/internal/application/router/grpc"
-	rest "shopping/order/internal/application/router/rest"
+	"shopping/internal/es"
+	"shopping/internal/registry"
+	"shopping/internal/registry/serdes"
+
+	grpc_router "shopping/order/internal/application/router/grpc"
+	rest_router "shopping/order/internal/application/router/rest"
+	"shopping/order/internal/domain"
 	"shopping/order/internal/handlers"
-	"shopping/order/internal/infra/repo"
 	"shopping/order/internal/logging"
 	"shopping/order/internal/usecase"
 )
 
 type Module struct{}
 
-func (m Module) Startup(ctx context.Context, container container.Container) error {
+func (m Module) Startup(ctx context.Context, container container.Container) (err error) {
 	// setup Driven applications
-	conn, err := router.Dial(ctx, container.Config().Rpc.Address())
+	reg := registry.New()
+	if err = registration(reg); err != nil {
+		return err
+	}
+
+	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
+	aggregateStore := es.AggreagteStoreWithMiddleware(
+		db.NewEventStore("ordering.events", container.DB(), reg),
+		es.NewEventPublisher(domainDispatcher),
+		db.NewSnapshotStore("ordering.snapshots", container.DB(), reg),
+	)
+
+	orders := es.NewAggregateRepository[*domain.Order](domain.OrderAggregate, reg, aggregateStore)
+	conn, err := grpc_router.Dial(ctx, container.Config().Rpc.Address())
 	if err != nil {
 		return err
 	}
-	domainDispatcher := ddd.NewEventDispatcher()
-	orders := repo.NewOrderRepository("ordering", container.DB())
-	products := router.NewProductRepository(conn)
-	payments := router.NewPaymentRepository(conn)
-	cutsomers := router.NewCustomerRepository(conn)
+	products := grpc_router.NewProductRepository(conn)
+	payments := grpc_router.NewPaymentRepository(conn)
+	cutsomers := grpc_router.NewCustomerRepository(conn)
 
 	// setup Applications
-	app := logging.LogApplicationAccess(
-		usecase.NewService(orders, payments, cutsomers, products, domainDispatcher),
-		container.Logger(),
-	)
-	paymentHandlers := logging.LogDomainEventHandlerAccess(
+
+	app := logging.LogApplicationAccess(usecase.NewService(orders, payments, cutsomers, products), container.Logger())
+
+	paymentHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
 		usecase.NewPaymentHandlers(payments),
+		"Payments",
 		container.Logger(),
 	)
 
 	// setup Driver applications
-	if err := router.RegisterServer(app, container.RPC()); err != nil {
+	if err := grpc_router.RegisterServer(app, container.RPC()); err != nil {
 		return err
 	}
-	if err := rest.RegisterGateway(ctx, container.Mux(), container.Config().Rpc.Address()); err != nil {
+	if err := rest_router.RegisterGateway(ctx, container.Mux(), container.Config().Rpc.Address()); err != nil {
 		return err
 	}
-	if err := rest.RegisterSwagger(container.Mux()); err != nil {
+	if err := rest_router.RegisterSwagger(container.Mux()); err != nil {
 		return err
 	}
 	handlers.RegisterPaymentHandlers(paymentHandlers, domainDispatcher)
+	return nil
+}
+
+func registration(reg registry.Registry) error {
+	serde := serdes.NewJsonSerde(reg)
+
+	if err := serde.Register(domain.Order{}, func(v any) error {
+		order := v.(*domain.Order)
+		order.Aggregate = es.NewAggregate("", domain.OrderAggregate)
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	if err := serde.Register(domain.OrderCreated{}); err != nil {
+		return err
+	}
+	if err := serde.Register(domain.OrderAddedItem{}); err != nil {
+		return err
+	}
+	if err := serde.Register(domain.OrderCheckedout{}); err != nil {
+		return err
+	}
+	if err := serde.Register(domain.OrderReadied{}); err != nil {
+		return err
+	}
+	if err := serde.Register(domain.OrderCompleted{}); err != nil {
+		return err
+	}
+	if err := serde.Register(domain.OrderCancelled{}); err != nil {
+		return err
+	}
+
+	if err := serde.RegisterKey(domain.OrderV1{}.SnapshotName(), domain.OrderV1{}); err != nil {
+		return err
+	}
+
 	return nil
 }

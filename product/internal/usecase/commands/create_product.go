@@ -2,10 +2,10 @@ package commands
 
 import (
 	"context"
-	"shopping/internal/ddd"
 	"shopping/product/internal/domain"
 
 	"github.com/google/wire"
+	"github.com/pkg/errors"
 )
 
 type (
@@ -17,33 +17,23 @@ type (
 	}
 
 	CreateProductHandler struct {
-		products        domain.ProductRepository
-		domainPublisher ddd.EventPublisher
+		products domain.ProductRepository
 	}
 )
 
 var CreateProductUseCaseSet = wire.NewSet(NewCreateProductHandler)
 
-func NewCreateProductHandler(products domain.ProductRepository, domainPublisher ddd.EventPublisher) CreateProductHandler {
+func NewCreateProductHandler(products domain.ProductRepository) CreateProductHandler {
 	return CreateProductHandler{
-		products:        products,
-		domainPublisher: domainPublisher,
+		products: products,
 	}
 }
 
 func (h CreateProductHandler) CreateProduct(ctx context.Context, cmd CreateProduct) error {
 	product, err := domain.CreateProduct(cmd.ID, cmd.Name, cmd.Description, cmd.Price)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error adding product")
 	}
 
-	if err = h.products.Save(ctx, product); err != nil {
-		return err
-	}
-
-	if err = h.domainPublisher.Publish(ctx, product.GetEvents()...); err != nil {
-		return err
-	}
-
-	return nil
+	return errors.Wrap(h.products.Save(ctx, product), "error adding product")
 }

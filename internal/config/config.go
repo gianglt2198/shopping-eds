@@ -15,7 +15,7 @@ import (
 type (
 	DatabaseConfig struct {
 		Name string
-		Conn string `required:"true" default:"postgresql://postgres:itsasecret@127.0.0.1:5432/postgres?sslmode=disable"`
+		Conn string `required:"true" default:"postgresql://postgres:postgres@127.0.0.1:5432/shopping?sslmode=disable"`
 	}
 
 	AppConfig struct {

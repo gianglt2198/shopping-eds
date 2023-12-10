@@ -16,16 +16,22 @@ service ProductsService {
             body: "*"
         };
     };
-    rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse) {
-        option (google.api.http) = {
-            put: "/api/product",
-            body: "*"
-        };
-    };
     rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse) {
         option (google.api.http) = {
             delete: "/api/product",
         };
+    };
+    rpc IncreasePrice(IncreasePriceRequest) returns (IncreasePriceResponse) {
+        option (google.api.http) = {
+            post: "/api/product/price/increase",
+            body: "*"
+        }; 
+    };
+    rpc DecreasePrice(DecreasePriceRequest) returns (DecreasePriceResponse) {
+        option (google.api.http) = {
+            post: "/api/product/price/decrease",
+            body: "*"
+        }; 
     };
 }
 
@@ -56,22 +62,29 @@ message CreateProductResponse {
     string id = 2;
 }
 
-message UpdateProductRequest {
-    string id = 1;
-    string name = 2;
-    string description = 3;
-    double price = 4;
-}
-
-message UpdateProductResponse {
-    string status_code = 1;
-}
-
 message DeleteProductRequest {
     string id = 2;
 }
 
 message DeleteProductResponse {
+    string status_code = 1;
+}
+
+message IncreasePriceRequest {
+    string id = 1;
+    double price = 4;
+}
+
+message IncreasePriceResponse {
+    string status_code = 1;
+}
+
+message DecreasePriceRequest {
+    string id = 1;
+    double price = 4;
+}
+
+message DecreasePriceResponse {
     string status_code = 1;
 }
 

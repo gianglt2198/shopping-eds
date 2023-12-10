@@ -1,4 +1,4 @@
-package router
+package grpc_router
 
 import (
 	"context"
@@ -43,10 +43,13 @@ func (s server) GetProduct(ctx context.Context, request *pb.GetProductRequest) (
 	product, err := s.app.GetProduct(ctx, queries.GetProduct{
 		ID: request.GetId(),
 	})
-	return &pb.GetProductResponse{Product: s.productFromDomain(product)}, err
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetProductResponse{Product: s.productFromDomain(product)}, nil
 }
 
-func (s server) productFromDomain(product *domain.Product) *pb.Product {
+func (s server) productFromDomain(product *domain.ManagementProduct) *pb.Product {
 	return &pb.Product{
 		Id:          product.ID,
 		Name:        product.Name,
@@ -55,19 +58,25 @@ func (s server) productFromDomain(product *domain.Product) *pb.Product {
 	}
 }
 
-func (s server) UpdateProduct(ctx context.Context, request *pb.UpdateProductRequest) (*pb.UpdateProductResponse, error) {
-	err := s.app.UpdateProduct(ctx, commands.UpdateProduct{
-		ID:          request.GetId(),
-		Name:        request.GetName(),
-		Price:       request.GetPrice(),
-		Description: request.GetDescription(),
-	})
-	return &pb.UpdateProductResponse{}, err
-}
-
 func (s server) DeleteProduct(ctx context.Context, request *pb.DeleteProductRequest) (*pb.DeleteProductResponse, error) {
 	err := s.app.DeleteProduct(ctx, commands.DeleteProduct{
 		ID: request.GetId(),
 	})
 	return &pb.DeleteProductResponse{}, err
+}
+
+func (s server) IncreasePrice(ctx context.Context, request *pb.IncreasePriceRequest) (*pb.IncreasePriceResponse, error) {
+	err := s.app.IncreasePriceProduct(ctx, commands.IncreasePrice{
+		ID:    request.GetId(),
+		Price: request.GetPrice(),
+	})
+	return &pb.IncreasePriceResponse{}, err
+}
+
+func (s server) DecreasePrice(ctx context.Context, request *pb.DecreasePriceRequest) (*pb.DecreasePriceResponse, error) {
+	err := s.app.DecreasePriceProduct(ctx, commands.DecreasePrice{
+		ID:    request.GetId(),
+		Price: request.GetPrice(),
+	})
+	return &pb.DecreasePriceResponse{}, err
 }

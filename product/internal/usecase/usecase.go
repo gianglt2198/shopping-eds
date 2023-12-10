@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"shopping/internal/ddd"
 	"shopping/product/internal/domain"
 	"shopping/product/internal/usecase/commands"
 	"shopping/product/internal/usecase/queries"
@@ -18,17 +17,19 @@ type (
 
 	Commands interface {
 		CreateProduct(context.Context, commands.CreateProduct) error
-		UpdateProduct(context.Context, commands.UpdateProduct) error
 		DeleteProduct(context.Context, commands.DeleteProduct) error
+		IncreasePriceProduct(context.Context, commands.IncreasePrice) error
+		DecreasePriceProduct(context.Context, commands.DecreasePrice) error
 	}
 
 	Queries interface {
-		GetProduct(context.Context, queries.GetProduct) (*domain.Product, error)
+		GetProduct(context.Context, queries.GetProduct) (*domain.ManagementProduct, error)
 	}
 
 	usecaseCommands struct {
 		commands.CreateProductHandler
-		commands.UpdateProductHandler
+		commands.IncreaseProductPriceHandler
+		commands.DecreaseProductPriceHandler
 		commands.DeleteProductHandler
 	}
 
@@ -46,15 +47,16 @@ var _ ServiceUsecase = (*serviceUsecase)(nil)
 
 var UseCaseSet = wire.NewSet(NewService)
 
-func NewService(repo domain.ProductRepository, domainPublisher ddd.EventPublisher) ServiceUsecase {
+func NewService(products domain.ProductRepository, management domain.ManagementRepository) ServiceUsecase {
 	return &serviceUsecase{
 		usecaseCommands: usecaseCommands{
-			CreateProductHandler: commands.NewCreateProductHandler(repo, domainPublisher),
-			UpdateProductHandler: commands.NewUpdateProductHandler(repo, domainPublisher),
-			DeleteProductHandler: commands.NewDeleteProductHandler(repo, domainPublisher),
+			CreateProductHandler:        commands.NewCreateProductHandler(products),
+			DeleteProductHandler:        commands.NewDeleteProductHandler(products),
+			IncreaseProductPriceHandler: commands.NewIncreaseProductPriceHandler(products),
+			DecreaseProductPriceHandler: commands.NewDecreaseProductPriceHandler(products),
 		},
 		usecaseQueries: usecaseQueries{
-			GetProductHandler: queries.NewGetProductHandler(repo),
+			GetProductHandler: queries.NewGetProductHandler(management),
 		},
 	}
 }
