@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"shopping/internal/ddd"
 	"shopping/order/internal/domain"
 	"shopping/order/internal/usecase/commands"
 	"shopping/order/internal/usecase/queries"
@@ -52,16 +51,15 @@ func NewService(
 	orders domain.OrderRepository,
 	payments domain.PaymentRepository,
 	customers domain.CustomerRepository,
-	products domain.ProductRepository,
-	domainPubliser ddd.EventPublisher) ServiceUsecase {
+	products domain.ProductRepository) ServiceUsecase {
 	return &serviceUsecase{
 		usecaseCommands: usecaseCommands{
-			CreateOrderHandler:   commands.NewCreateOrderHandler(orders, customers, domainPubliser),
-			CancelOrderHandler:   commands.NewCancelOrderHandler(orders, payments, domainPubliser),
-			ReadyOrderHandler:    commands.NewReadyOrderHandler(orders, payments, domainPubliser),
-			CompleteOrderHandler: commands.NewCompleteOrderHandler(orders, domainPubliser),
-			AddItemHandler:       commands.NewAddItemHandler(orders, products, domainPubliser),
-			CheckoutOrderHandler: commands.NewCheckoutOrderHandler(orders, payments, domainPubliser),
+			CreateOrderHandler:   commands.NewCreateOrderHandler(orders, customers),
+			CancelOrderHandler:   commands.NewCancelOrderHandler(orders, payments),
+			ReadyOrderHandler:    commands.NewReadyOrderHandler(orders, payments),
+			CompleteOrderHandler: commands.NewCompleteOrderHandler(orders),
+			AddItemHandler:       commands.NewAddItemHandler(orders, products),
+			CheckoutOrderHandler: commands.NewCheckoutOrderHandler(orders, payments),
 		},
 		usecaseQueries: usecaseQueries{
 			GetOrderHandler: queries.NewGetOrderHandler(orders),

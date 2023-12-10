@@ -297,13 +297,6 @@
     "orderpbCreateOrderRequest": {
       "type": "object",
       "properties": {
-        "items": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/orderpbItem"
-          }
-        },
         "customerId": {
           "type": "string"
         }
@@ -357,8 +350,9 @@
           "type": "string"
         },
         "items": {
-          "type": "object",
-          "additionalProperties": {
+          "type": "array",
+          "items": {
+            "type": "object",
             "$ref": "#/definitions/orderpbItem"
           }
         },

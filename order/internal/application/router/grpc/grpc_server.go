@@ -1,4 +1,4 @@
-package router
+package grpc_router
 
 import (
 	"context"
@@ -33,14 +33,6 @@ func (s server) CreateOrder(ctx context.Context, request *pb.CreateOrderRequest)
 		ID:         uuid.New().String(),
 		CustomerID: request.GetCustomerId(),
 	}
-	for _, i := range request.GetItems() {
-		data.Items = append(data.Items, &domain.Item{
-			ProductID:   i.GetProductId(),
-			ProductName: i.GetProductName(),
-			Price:       i.GetPrice(),
-			Quantity:    i.GetQuantity(),
-		})
-	}
 
 	err := s.app.CreateOrder(ctx, data)
 
@@ -59,17 +51,17 @@ func (s server) orderFromDomain(order *domain.Order) *pb.Order {
 	if order == nil {
 		return nil
 	}
-	items := make(map[string]*pb.Item)
-	for k, item := range order.Items {
-		items[k] = &pb.Item{
+	items := make([]*pb.Item, 0)
+	for _, item := range order.Items {
+		items = append(items, &pb.Item{
 			ProductId:   item.ProductID,
 			ProductName: item.ProductName,
 			Price:       item.Price,
 			Quantity:    item.Quantity,
-		}
+		})
 	}
 	return &pb.Order{
-		Id:         order.ID,
+		Id:         order.ID(),
 		CustomerId: order.CustomerID,
 		Items:      items,
 		Status:     order.Status.String(),

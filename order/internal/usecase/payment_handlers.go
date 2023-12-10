@@ -6,29 +6,38 @@ import (
 	"shopping/order/internal/domain"
 )
 
-type PaymentHandlers struct {
+type PaymentHandlers[T ddd.AggregateEvent] struct {
 	payments domain.PaymentRepository
-	ignoreUnimplementedDomainEvents
 }
 
-var _ DomainEventHandlers = (*PaymentHandlers)(nil)
+var _ ddd.EventHandler[ddd.AggregateEvent] = (*PaymentHandlers[ddd.AggregateEvent])(nil)
 
-func NewPaymentHandlers(payments domain.PaymentRepository) *PaymentHandlers {
-	return &PaymentHandlers{
+func NewPaymentHandlers(payments domain.PaymentRepository) *PaymentHandlers[ddd.AggregateEvent] {
+	return &PaymentHandlers[ddd.AggregateEvent]{
 		payments: payments,
 	}
 }
 
-func (h PaymentHandlers) OnOrderCheckedout(ctx context.Context, event ddd.Event) error {
-	orderCheckedout := event.(*domain.OrderCheckedout)
-	_, err := h.payments.CreateInvoice(ctx, orderCheckedout.Order.ID, orderCheckedout.Order.CustomerID, orderCheckedout.Order.GetTotal())
+func (h PaymentHandlers[T]) HandleEvent(ctx context.Context, event T) error {
+	switch event.EventName() {
+	case domain.OrderCheckedOutEvent:
+		return h.OnOrderCheckedout(ctx, event)
+	case domain.OrderReadiedEvent:
+		return h.OnOrderCancelled(ctx, event)
+	}
+	return nil
+}
+
+func (h PaymentHandlers[T]) OnOrderCheckedout(ctx context.Context, event ddd.AggregateEvent) error {
+	orderCheckedout := event.Payload().(*domain.OrderCheckedout)
+	_, err := h.payments.CreateInvoice(ctx, event.AggregateID(), orderCheckedout.CustomerID, orderCheckedout.Total)
 	return err
 }
 
-func (h PaymentHandlers) OnOrderCancelled(ctx context.Context, event ddd.Event) error {
-	orderCancelled := event.(*domain.OrderCancelled)
-	if orderCancelled.Order.PaymentID != "" {
-		return h.payments.CancelInvoice(ctx, orderCancelled.Order.PaymentID)
+func (h PaymentHandlers[T]) OnOrderCancelled(ctx context.Context, event ddd.AggregateEvent) error {
+	orderCancelled := event.Payload().(*domain.OrderCancelled)
+	if orderCancelled.PaymentID != "" {
+		return h.payments.CancelInvoice(ctx, orderCancelled.PaymentID)
 	}
 	return nil
 }

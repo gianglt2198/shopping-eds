@@ -2,7 +2,6 @@ package commands
 
 import (
 	"context"
-	"shopping/internal/ddd"
 	"shopping/order/internal/domain"
 
 	"github.com/google/wire"
@@ -13,21 +12,19 @@ type CompleteOrder struct {
 }
 
 type CompleteOrderHandler struct {
-	orders          domain.OrderRepository
-	domainPublisher ddd.EventPublisher
+	orders domain.OrderRepository
 }
 
 var CompleteOrderUseCaseSet = wire.NewSet(NewCompleteOrderHandler)
 
-func NewCompleteOrderHandler(orders domain.OrderRepository, domainPublisher ddd.EventPublisher) CompleteOrderHandler {
+func NewCompleteOrderHandler(orders domain.OrderRepository) CompleteOrderHandler {
 	return CompleteOrderHandler{
-		orders:          orders,
-		domainPublisher: domainPublisher,
+		orders: orders,
 	}
 }
 
 func (h CompleteOrderHandler) CompleteOrder(ctx context.Context, cmd CompleteOrder) error {
-	order, err := h.orders.Find(ctx, cmd.ID)
+	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
@@ -36,11 +33,7 @@ func (h CompleteOrderHandler) CompleteOrder(ctx context.Context, cmd CompleteOrd
 		return err
 	}
 
-	if err = h.orders.Update(ctx, order); err != nil {
-		return err
-	}
-
-	if err = h.domainPublisher.Publish(ctx, order.GetEvents()...); err != nil {
+	if err = h.orders.Save(ctx, order); err != nil {
 		return err
 	}
 

@@ -5,36 +5,49 @@ import (
 	"sync"
 )
 
-type EventSubscriber interface {
-	Subscribe(Event, EventHandler)
-}
+type (
+	EventHandler[T Event] interface {
+		HandleEvent(context.Context, T) error
+	}
 
-type EventPublisher interface {
-	Publish(context.Context, ...Event) error
-}
+	// EventHandlerFunc[T Event] func(context.Context, T) error
 
-type EventDispatcher struct {
-	handlers map[string][]EventHandler
-	mu       sync.Mutex
-}
+	EventSubscriber[T Event] interface {
+		Subscribe(string, EventHandler[T])
+	}
 
-func NewEventDispatcher() *EventDispatcher {
-	return &EventDispatcher{
-		handlers: make(map[string][]EventHandler),
+	EventPublisher[T Event] interface {
+		Publish(context.Context, ...T) error
+	}
+
+	EventDispatcher[T Event] struct {
+		handlers map[string][]EventHandler[T]
+		mu       sync.Mutex
+	}
+)
+
+var _ interface {
+	EventSubscriber[Event]
+	EventPublisher[Event]
+} = (*EventDispatcher[Event])(nil)
+
+func NewEventDispatcher[T Event]() *EventDispatcher[T] {
+	return &EventDispatcher[T]{
+		handlers: make(map[string][]EventHandler[T]),
 	}
 }
 
-func (h *EventDispatcher) Subscribe(event Event, handler EventHandler) {
+func (h *EventDispatcher[T]) Subscribe(name string, handler EventHandler[T]) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	h.handlers[event.EventName()] = append(h.handlers[event.EventName()], handler)
+	h.handlers[name] = append(h.handlers[name], handler)
 }
 
-func (h *EventDispatcher) Publish(ctx context.Context, events ...Event) error {
+func (h *EventDispatcher[T]) Publish(ctx context.Context, events ...T) error {
 	for _, e := range events {
 		for _, handler := range h.handlers[e.EventName()] {
-			err := handler(ctx, e)
+			err := handler.HandleEvent(ctx, e)
 			if err != nil {
 				return err
 			}
@@ -42,3 +55,7 @@ func (h *EventDispatcher) Publish(ctx context.Context, events ...Event) error {
 	}
 	return nil
 }
+
+// func (f EventHandlerFunc[T]) HandleEvent(ctx context.Context, event T) error {
+// 	return f(ctx, event)
+// }

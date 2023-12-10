@@ -2,10 +2,7 @@ package commands
 
 import (
 	"context"
-	"shopping/internal/ddd"
 	"shopping/order/internal/domain"
-
-	"github.com/google/wire"
 )
 
 type CancelOrder struct {
@@ -13,23 +10,19 @@ type CancelOrder struct {
 }
 
 type CancelOrderHandler struct {
-	orders          domain.OrderRepository
-	payments        domain.PaymentRepository
-	domainPublisher ddd.EventPublisher
+	orders   domain.OrderRepository
+	payments domain.PaymentRepository
 }
 
-var CancelOrderUseCaseSet = wire.NewSet(NewCancelOrderHandler)
-
-func NewCancelOrderHandler(orders domain.OrderRepository, payments domain.PaymentRepository, domainPublisher ddd.EventPublisher) CancelOrderHandler {
+func NewCancelOrderHandler(orders domain.OrderRepository, payments domain.PaymentRepository) CancelOrderHandler {
 	return CancelOrderHandler{
-		orders:          orders,
-		payments:        payments,
-		domainPublisher: domainPublisher,
+		orders:   orders,
+		payments: payments,
 	}
 }
 
 func (h CancelOrderHandler) CancelOrder(ctx context.Context, cmd CancelOrder) error {
-	order, err := h.orders.Find(ctx, cmd.ID)
+	order, err := h.orders.Load(ctx, cmd.ID)
 	if err != nil {
 		return err
 	}
@@ -38,11 +31,7 @@ func (h CancelOrderHandler) CancelOrder(ctx context.Context, cmd CancelOrder) er
 		return err
 	}
 
-	if err = h.orders.Update(ctx, order); err != nil {
-		return err
-	}
-
-	if err = h.domainPublisher.Publish(ctx, order.GetEvents()...); err != nil {
+	if err = h.orders.Save(ctx, order); err != nil {
 		return err
 	}
 

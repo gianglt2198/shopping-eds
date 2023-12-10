@@ -2,10 +2,7 @@ package commands
 
 import (
 	"context"
-	"shopping/internal/ddd"
 	"shopping/order/internal/domain"
-
-	"github.com/google/wire"
 )
 
 type AddItem struct {
@@ -15,23 +12,19 @@ type AddItem struct {
 }
 
 type AddItemHandler struct {
-	orders          domain.OrderRepository
-	products        domain.ProductRepository
-	domainPublisher ddd.EventPublisher
+	orders   domain.OrderRepository
+	products domain.ProductRepository
 }
 
-var AddItemUseCaseSet = wire.NewSet(NewAddItemHandler)
-
-func NewAddItemHandler(orders domain.OrderRepository, products domain.ProductRepository, domainPublisher ddd.EventPublisher) AddItemHandler {
+func NewAddItemHandler(orders domain.OrderRepository, products domain.ProductRepository) AddItemHandler {
 	return AddItemHandler{
-		orders:          orders,
-		products:        products,
-		domainPublisher: domainPublisher,
+		orders:   orders,
+		products: products,
 	}
 }
 
 func (h AddItemHandler) AddItem(ctx context.Context, cmd AddItem) error {
-	order, err := h.orders.Find(ctx, cmd.OrderID)
+	order, err := h.orders.Load(ctx, cmd.OrderID)
 	if err != nil {
 		return err
 	}
@@ -45,11 +38,7 @@ func (h AddItemHandler) AddItem(ctx context.Context, cmd AddItem) error {
 		return err
 	}
 
-	if err = h.orders.Update(ctx, order); err != nil {
-		return err
-	}
-
-	if err = h.domainPublisher.Publish(ctx, order.GetEvents()...); err != nil {
+	if err = h.orders.Save(ctx, order); err != nil {
 		return err
 	}
 

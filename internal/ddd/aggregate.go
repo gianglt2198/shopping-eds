@@ -1,24 +1,68 @@
 package ddd
 
-type Aggregate interface {
-	Entity
-	AddEvents(Event)
-	GetEvents() []Event
+const (
+	AggregateNameKey    = "aggregate-name"
+	AggregateIDKey      = "aggregate-id"
+	AggregateVersionKey = "aggregate-version"
+)
+
+type (
+	AggregateNamer interface {
+		AggregateName() string
+	}
+
+	Eventer interface {
+		AddEvent(string, EventPayload, ...EventOption)
+		Events() []AggregateEvent
+		ClearEvents()
+	}
+
+	Aggregate struct {
+		Entity
+		events []AggregateEvent
+	}
+
+	AggregateEvent interface {
+		Event
+		AggregateName() string
+		AggregateID() string
+		AggregateVersion() int
+	}
+
+	aggregateEvent struct {
+		event
+	}
+)
+
+var _ interface {
+	AggregateNamer
+	Eventer
+} = (*Aggregate)(nil)
+
+func NewAggregate(id, name string) Aggregate {
+	return Aggregate{
+		Entity: NewEntity(id, name),
+		events: make([]AggregateEvent, 0),
+	}
 }
 
-type AggregateBase struct {
-	ID     string
-	events []Event
+func (a Aggregate) AggregateName() string    { return a.name }
+func (a Aggregate) Events() []AggregateEvent { return a.events }
+func (a *Aggregate) ClearEvents()            { a.events = []AggregateEvent{} }
+
+func (a *Aggregate) AddEvent(name string, payload EventPayload, ops ...EventOption) {
+	ops = append(ops, Metadata{
+		AggregateNameKey: a.name,
+		AggregateIDKey:   a.id,
+	})
+
+	a.events = append(a.events, aggregateEvent{
+		event: newEvent(name, payload, ops...),
+	})
 }
 
-func (a AggregateBase) GetID() string {
-	return a.ID
-}
+func (a *Aggregate) setEvents(events []AggregateEvent) { a.events = events }
 
-func (a *AggregateBase) AddEvents(event Event) {
-	a.events = append(a.events, event)
-}
-
-func (a *AggregateBase) GetEvents() []Event {
-	return a.events
-}
+func (e aggregateEvent) AggregateName() string { return e.metadata.Get(AggregateNameKey).(string) }
+func (e aggregateEvent) AggregateID() string   { return e.metadata.Get(AggregateIDKey).(string) }
+func (e aggregateEvent) AggregateVersion() int { return e.metadata.Get(AggregateVersionKey).(int) }

@@ -1,4 +1,4 @@
-package router
+package grpc_router
 
 import (
 	"context"
