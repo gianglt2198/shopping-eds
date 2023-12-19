@@ -18,10 +18,16 @@ type (
 		Conn string `required:"true" default:"postgresql://postgres:postgres@127.0.0.1:5432/shopping?sslmode=disable"`
 	}
 
+	NatsConfig struct {
+		URL    string `required:"true" default:"127.0.0.1:4222"`
+		Stream string `default:"shopping"`
+	}
+
 	AppConfig struct {
 		Environment     string
 		LogLevel        string `envconfig:"LOG_LEVEL" default:"DEBUG"`
 		Database        DatabaseConfig
+		Nats            NatsConfig
 		Rpc             rpc.RpcConfig
 		Web             web.WebConfig
 		ShutdownTimeout time.Duration `envconfig:"SHUTDOWN_TIMEOUT" default:"30s"`

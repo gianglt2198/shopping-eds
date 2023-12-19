@@ -2,10 +2,12 @@ package customer
 
 import (
 	"context"
+	"shopping/internal/am"
 	"shopping/internal/container"
 	"shopping/internal/db"
 	"shopping/internal/ddd"
 	"shopping/internal/es"
+	"shopping/internal/jetstream"
 	"shopping/internal/registry"
 	"shopping/internal/registry/serdes"
 	grpc_router "shopping/product/internal/application/router/grpc"
@@ -15,6 +17,7 @@ import (
 	"shopping/product/internal/infra/repo"
 	"shopping/product/internal/logging"
 	"shopping/product/internal/usecase"
+	"shopping/product/pb"
 )
 
 type Module struct{}
@@ -25,6 +28,10 @@ func (m Module) Startup(ctx context.Context, container container.Container) erro
 	if err != nil {
 		return err
 	}
+	if err = pb.Registration(reg); err != nil {
+		return err
+	}
+	eventStream := am.NewEventStream(reg, jetstream.NewStream(container.Config().Nats.Stream, container.JS()))
 	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
 	aggregateProduct := es.AggreagteStoreWithMiddleware(
 		db.NewEventStore("products.events", container.DB(), reg),
@@ -39,10 +46,13 @@ func (m Module) Startup(ctx context.Context, container container.Container) erro
 		usecase.NewService(products, management),
 		container.Logger(),
 	)
-
 	managementHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
 		usecase.NewManagementHandlers(management),
 		"Management", container.Logger(),
+	)
+	integrationEventHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
+		usecase.NewIntegrationEventHandlers(eventStream),
+		"IntegrationEvents", container.Logger(),
 	)
 
 	// setup Driver adapters
@@ -56,7 +66,7 @@ func (m Module) Startup(ctx context.Context, container container.Container) erro
 		return err
 	}
 	handlers.RegisterManagementHandler(managementHandlers, domainDispatcher)
-
+	handlers.RegisterIntegrationHandlers(integrationEventHandlers, domainDispatcher)
 	return nil
 }
 

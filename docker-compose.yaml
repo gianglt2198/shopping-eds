@@ -31,7 +31,6 @@ services:
   pgAdmin:
     image: dpage/pgadmin4:latest
     restart: always
-
     environment:
       - PGADMIN_DEFAULT_EMAIL=giangle2198@gmail.com
       - PGADMIN_DEFAULT_PASSWORD=1
@@ -40,5 +39,31 @@ services:
     ports:
       - 83:80
     container_name: pg_admin 
+  nats:
+    container_name: nats
+    hostname: nats
+    image: nats:2.9-alpine
+    ports:
+      - 4222:4222
+      - 8222:8222
+    command:
+      - -c 
+      - config/config_nats.conf
+    volumes:
+      - 'jsdata:/var/lib/nats/data'
+      - './docker/config_nats.conf:/config/config_nats.conf'
+  # nats-ui:
+  #   container_name: nats-ui
+  #   hostname: nats-ui
+  #   image: piotrpersona/nats-streaming-ui
+  #   ports:
+  #     - '8282:8282'
+  #   links: 
+  #     - nats:nats
+  #   environment:
+  #     - STAN_URL=nats:4222
+  #     - STAN_MONITOR_URL=http://nats:8222
+  #     - STAN_CLUSTER=test-cluster
 volumes:
   pgdata:
+  jsdata:

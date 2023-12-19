@@ -5,8 +5,8 @@ import (
 	"shopping/product/internal/domain"
 )
 
-func RegisterManagementHandler(managementHandlers ddd.EventHandler[ddd.AggregateEvent], domainSubscriber ddd.EventSubscriber[ddd.AggregateEvent]) {
-	domainSubscriber.Subscribe(managementHandlers,
+func RegisterIntegrationHandlers(eventHandlers ddd.EventHandler[ddd.AggregateEvent], domainSubscriber ddd.EventSubscriber[ddd.AggregateEvent]) {
+	domainSubscriber.Subscribe(eventHandlers,
 		domain.ProductCreatedEvent,
 		domain.ProductDeletedEvent,
 		domain.ProductInscreasedPriceEvent,

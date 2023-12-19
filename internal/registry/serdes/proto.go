@@ -30,14 +30,14 @@ func (ProtoSerde) deserialize(data []byte, v interface{}) error {
 }
 
 func (s *ProtoSerde) Register(v registry.Registrable, ops ...registry.BuildOption) error {
-	if reflect.TypeOf(v).Implements(protoT) {
+	if !reflect.TypeOf(v).Implements(protoT) {
 		return fmt.Errorf("%T does not implement proto.Message", v)
 	}
 	return registry.Register(s.r, v, s.serialize, s.deserialize, ops)
 }
 
 func (s *ProtoSerde) RegisterKey(key string, v interface{}, ops ...registry.BuildOption) error {
-	if reflect.TypeOf(v).Implements(protoT) {
+	if !reflect.TypeOf(v).Implements(protoT) {
 		return fmt.Errorf("%T does not implement proto.Message", v)
 	}
 	return registry.RegisterKey(s.r, key, v, s.serialize, s.deserialize, ops)
