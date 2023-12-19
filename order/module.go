@@ -2,12 +2,15 @@ package customer
 
 import (
 	"context"
+	"shopping/internal/am"
 	"shopping/internal/container"
 	"shopping/internal/db"
 	"shopping/internal/ddd"
 	"shopping/internal/es"
+	"shopping/internal/jetstream"
 	"shopping/internal/registry"
 	"shopping/internal/registry/serdes"
+	"shopping/product/pb"
 
 	grpc_router "shopping/order/internal/application/router/grpc"
 	rest_router "shopping/order/internal/application/router/rest"
@@ -25,7 +28,10 @@ func (m Module) Startup(ctx context.Context, container container.Container) (err
 	if err = registration(reg); err != nil {
 		return err
 	}
-
+	if err = pb.Registration(reg); err != nil {
+		return err
+	}
+	eventStream := am.NewEventStream(reg, jetstream.NewStream(container.Config().Nats.Stream, container.JS()))
 	domainDispatcher := ddd.NewEventDispatcher[ddd.AggregateEvent]()
 	aggregateStore := es.AggreagteStoreWithMiddleware(
 		db.NewEventStore("ordering.events", container.DB(), reg),
@@ -51,6 +57,10 @@ func (m Module) Startup(ctx context.Context, container container.Container) (err
 		"Payments",
 		container.Logger(),
 	)
+	productHandlers := logging.LogEventHandlerAccess[ddd.Event](
+		usecase.NewProductHandlers(container.Logger()),
+		"Product", container.Logger(),
+	)
 
 	// setup Driver applications
 	if err := grpc_router.RegisterServer(app, container.RPC()); err != nil {
@@ -63,6 +73,9 @@ func (m Module) Startup(ctx context.Context, container container.Container) (err
 		return err
 	}
 	handlers.RegisterPaymentHandlers(paymentHandlers, domainDispatcher)
+	if err = handlers.RegisterProductHandlers(productHandlers, eventStream); err != nil {
+		return err
+	}
 	return nil
 }
 

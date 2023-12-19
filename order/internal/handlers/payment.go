@@ -6,6 +6,8 @@ import (
 )
 
 func RegisterPaymentHandlers(paymentHandlers ddd.EventHandler[ddd.AggregateEvent], domainSubscriber ddd.EventSubscriber[ddd.AggregateEvent]) {
-	domainSubscriber.Subscribe(domain.OrderCheckedOutEvent, paymentHandlers)
-	domainSubscriber.Subscribe(domain.OrderCanceledEvent, paymentHandlers)
+	domainSubscriber.Subscribe(paymentHandlers,
+		domain.OrderCheckedOutEvent,
+		domain.OrderCanceledEvent,
+	)
 }
