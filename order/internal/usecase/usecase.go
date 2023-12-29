@@ -40,6 +40,7 @@ type (
 	}
 	usecaseQueries struct {
 		queries.GetOrderHandler
+		queries.SearchingOrderHanlder
 	}
 )
 
@@ -51,7 +52,8 @@ func NewService(
 	orders domain.OrderRepository,
 	payments domain.PaymentRepository,
 	customers domain.CustomerRepository,
-	products domain.ProductRepository) ServiceUsecase {
+	products domain.ProductRepository,
+	searching domain.SearchingRepository) ServiceUsecase {
 	return &serviceUsecase{
 		usecaseCommands: usecaseCommands{
 			CreateOrderHandler:   commands.NewCreateOrderHandler(orders, customers),
@@ -62,7 +64,8 @@ func NewService(
 			CheckoutOrderHandler: commands.NewCheckoutOrderHandler(orders, payments),
 		},
 		usecaseQueries: usecaseQueries{
-			GetOrderHandler: queries.NewGetOrderHandler(orders),
+			GetOrderHandler:       queries.NewGetOrderHandler(orders),
+			SearchingOrderHanlder: *queries.NewSearchingOrderHandler(searching),
 		},
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"shopping/internal/am"
 	"shopping/internal/ddd"
 	"shopping/product/internal/domain"
-	"shopping/product/pb"
+	"shopping/product/productspb"
 )
 
 type IntegrationEventHandlers[T ddd.AggregateEvent] struct {
@@ -36,8 +36,8 @@ func (h IntegrationEventHandlers[T]) HandleEvent(ctx context.Context, event T) e
 
 func (h IntegrationEventHandlers[T]) onProductCreated(ctx context.Context, event ddd.AggregateEvent) error {
 	payload := event.Payload().(*domain.ProductCreated)
-	return h.publisher.Publish(ctx, pb.ProductAggregateChannel,
-		ddd.NewEvent(pb.ProductCreatedEvent, &pb.ProductCreated{
+	return h.publisher.Publish(ctx, productspb.ProductAggregateChannel,
+		ddd.NewEvent(productspb.ProductCreatedEvent, &productspb.ProductCreated{
 			Id:          event.ID(),
 			Name:        payload.Name,
 			Description: payload.Description,
@@ -47,8 +47,8 @@ func (h IntegrationEventHandlers[T]) onProductCreated(ctx context.Context, event
 
 func (h IntegrationEventHandlers[T]) onProductIncreasedPrice(ctx context.Context, event ddd.AggregateEvent) error {
 	payload := event.Payload().(*domain.ProductPriceChanged)
-	return h.publisher.Publish(ctx, pb.ProductAggregateChannel,
-		ddd.NewEvent(pb.ProductPriceIncreasedEvent, &pb.ProductPriceChanged{
+	return h.publisher.Publish(ctx, productspb.ProductAggregateChannel,
+		ddd.NewEvent(productspb.ProductPriceIncreasedEvent, &productspb.ProductPriceChanged{
 			Id:    event.ID(),
 			Delta: payload.Delta,
 		}))
@@ -56,16 +56,16 @@ func (h IntegrationEventHandlers[T]) onProductIncreasedPrice(ctx context.Context
 
 func (h IntegrationEventHandlers[T]) onProducDecreasedPrice(ctx context.Context, event ddd.AggregateEvent) error {
 	payload := event.Payload().(*domain.ProductPriceChanged)
-	return h.publisher.Publish(ctx, pb.ProductAggregateChannel,
-		ddd.NewEvent(pb.ProductPriceDecreasedEvent, &pb.ProductPriceChanged{
+	return h.publisher.Publish(ctx, productspb.ProductAggregateChannel,
+		ddd.NewEvent(productspb.ProductPriceDecreasedEvent, &productspb.ProductPriceChanged{
 			Id:    event.ID(),
 			Delta: payload.Delta,
 		}))
 }
 
 func (h IntegrationEventHandlers[T]) onProductDeleted(ctx context.Context, event ddd.AggregateEvent) error {
-	return h.publisher.Publish(ctx, pb.ProductAggregateChannel,
-		ddd.NewEvent(pb.ProductDeletedEvent, &pb.ProductCreated{
+	return h.publisher.Publish(ctx, productspb.ProductAggregateChannel,
+		ddd.NewEvent(productspb.ProductDeletedEvent, &productspb.ProductCreated{
 			Id: event.ID(),
 		}))
 }

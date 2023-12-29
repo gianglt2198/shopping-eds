@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             (unknown)
-// source: pb/customer.proto
+// source: customerspb/customer.proto
 
-package pb
+package customerspb
 
 import (
 	context "context"
@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	CustomersService_RegisterCustomer_FullMethodName = "/customerpb.CustomersService/RegisterCustomer"
-	CustomersService_GetCustomer_FullMethodName      = "/customerpb.CustomersService/GetCustomer"
+	CustomersService_RegisterCustomer_FullMethodName = "/customerspb.CustomersService/RegisterCustomer"
+	CustomersService_GetCustomer_FullMethodName      = "/customerspb.CustomersService/GetCustomer"
 )
 
 // CustomersServiceClient is the client API for CustomersService service.
@@ -127,7 +127,7 @@ func _CustomersService_GetCustomer_Handler(srv interface{}, ctx context.Context,
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var CustomersService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "customerpb.CustomersService",
+	ServiceName: "customerspb.CustomersService",
 	HandlerType: (*CustomersServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -140,5 +140,5 @@ var CustomersService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pb/customer.proto",
+	Metadata: "customerspb/customer.proto",
 }

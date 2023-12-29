@@ -3,7 +3,7 @@ package router
 import (
 	"context"
 
-	orderspb "shopping/order/pb"
+	orderspb "shopping/order/orderspb"
 	"shopping/payment/internal/domain"
 
 	"github.com/google/wire"

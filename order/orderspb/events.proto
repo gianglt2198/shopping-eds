@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package orderpb;
+
+message OrderCreated {
+    string id = 1;
+    string customer_id = 2;
+}
+
+message OrderAddedItem {
+    message Item {
+        string product_id = 1;
+        double price = 2;
+        int32 quantity = 3;
+    }
+    string id = 1;
+    Item item = 2;
+}
+
+message OrderCheckedOut {
+    string id = 1;
+    string customer_id = 2;
+    double total = 3;
+}
+
+message OrderReadied {
+    string id = 1;
+    string payment_id = 2;
+}
+
+message OrderCanceled {
+    string id = 1;
+    string payment_id = 2;
+}
+
+message OrderCompleted {
+    string id = 1;
+}

@@ -2,7 +2,7 @@ package rest_router
 
 import (
 	"context"
-	"shopping/product/pb"
+	"shopping/product/productspb"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -14,7 +14,7 @@ func RegisterGateway(ctx context.Context, mux *chi.Mux, grpcAddr string) error {
 	const apiRoot = "/api/product"
 
 	gateway := runtime.NewServeMux()
-	err := pb.RegisterProductsServiceHandlerFromEndpoint(ctx, gateway, grpcAddr, []grpc.DialOption{
+	err := productspb.RegisterProductsServiceHandlerFromEndpoint(ctx, gateway, grpcAddr, []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	})
 	if err != nil {

@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "pb/order.proto",
+    "title": "orderspb/events.proto",
     "version": "version not set"
   },
   "tags": [
@@ -237,9 +237,129 @@
           "OrderingService"
         ]
       }
+    },
+    "/api/order/search": {
+      "get": {
+        "operationId": "OrderingService_SearchOrders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orderpbSearchOrdersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "filters.customerId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "filters.after",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "filters.before",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "filters.productIds",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "filters.minTotal",
+            "in": "query",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "filters.maxTotal",
+            "in": "query",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "filters.status",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "next",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "OrderingService"
+        ]
+      }
     }
   },
   "definitions": {
+    "SearchOrdersRequestFilters": {
+      "type": "object",
+      "properties": {
+        "customerId": {
+          "type": "string"
+        },
+        "after": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "before": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "productIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "minTotal": {
+          "type": "number",
+          "format": "double"
+        },
+        "maxTotal": {
+          "type": "number",
+          "format": "double"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
     "orderpbAddItemRequest": {
       "type": "object",
       "properties": {
@@ -374,6 +494,21 @@
     },
     "orderpbReadyOrderResponse": {
       "type": "object"
+    },
+    "orderpbSearchOrdersResponse": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/orderpbOrder"
+          }
+        },
+        "next": {
+          "type": "string"
+        }
+      }
     },
     "protobufAny": {
       "type": "object",

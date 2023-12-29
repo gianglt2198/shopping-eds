@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"shopping/customer/internal/domain"
-
-	"github.com/google/wire"
 )
 
 type CustomerRepository struct {
@@ -15,8 +13,6 @@ type CustomerRepository struct {
 }
 
 var _ domain.CustomerRepository = (*CustomerRepository)(nil)
-
-var RepositorySet = wire.NewSet(NewCustomerRepository)
 
 func NewCustomerRepository(tableName string, db *sql.DB) domain.CustomerRepository {
 	return CustomerRepository{
@@ -28,7 +24,7 @@ func NewCustomerRepository(tableName string, db *sql.DB) domain.CustomerReposito
 func (r CustomerRepository) Save(ctx context.Context, customer *domain.Customer) error {
 	const query = "INSERT INTO %s (id, name, sms_number, email, active) VALUES ($1, $2, $3, $4, $5)"
 
-	_, err := r.db.ExecContext(ctx, r.table(query), customer.ID, customer.Name, customer.SmsNumber, customer.Email, customer.Active)
+	_, err := r.db.ExecContext(ctx, r.table(query), customer.ID(), customer.Name, customer.SmsNumber, customer.Email, customer.Active)
 
 	return err
 }
@@ -36,9 +32,7 @@ func (r CustomerRepository) Save(ctx context.Context, customer *domain.Customer)
 func (r CustomerRepository) Find(ctx context.Context, customerID string) (*domain.Customer, error) {
 	const query = "SELECT name, sms_number, email, active FROM %s WHERE id = $1 LIMIT 1"
 
-	customer := &domain.Customer{
-		ID: customerID,
-	}
+	customer := domain.NewCustomer(customerID)
 
 	err := r.db.QueryRowContext(ctx, r.table(query), customerID).Scan(&customer.Name, &customer.SmsNumber, &customer.Email, &customer.Active)
 

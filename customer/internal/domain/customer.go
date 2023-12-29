@@ -1,15 +1,25 @@
 package domain
 
 import (
+	"shopping/internal/ddd"
+
 	"github.com/stackus/errors"
 )
 
+const CustomerAggregate = "customers.CustomerAggregate"
+
 type Customer struct {
-	ID        string
+	ddd.Aggregate
 	Name      string
 	SmsNumber string
 	Email     string
 	Active    bool
+}
+
+func NewCustomer(id string) *Customer {
+	return &Customer{
+		Aggregate: ddd.NewAggregate(id, CustomerAggregate),
+	}
 }
 
 func RegisterCustomer(id, name, smsNumber, email string) (*Customer, error) {
@@ -29,11 +39,15 @@ func RegisterCustomer(id, name, smsNumber, email string) (*Customer, error) {
 		return nil, errors.Wrap(errors.ErrBadRequest, "the email cannot be blank")
 	}
 
-	return &Customer{
-		ID:        id,
-		Name:      name,
-		SmsNumber: smsNumber,
-		Email:     email,
-		Active:    true,
-	}, nil
+	customer := NewCustomer(id)
+	customer.Name = name
+	customer.Active = true
+	customer.Email = email
+	customer.SmsNumber = smsNumber
+
+	customer.AddEvent(CustomerRegisteredEvent, &CustomerRegistered{
+		Customer: customer,
+	})
+
+	return customer, nil
 }
