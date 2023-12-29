@@ -1,4 +1,4 @@
-package pb
+package productspb
 
 import (
 	"shopping/internal/registry"

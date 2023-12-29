@@ -7,7 +7,7 @@ import (
 	"shopping/product/internal/usecase"
 	"shopping/product/internal/usecase/commands"
 	"shopping/product/internal/usecase/queries"
-	"shopping/product/pb"
+	"shopping/product/productspb"
 
 	"github.com/google/uuid"
 	"github.com/google/wire"
@@ -16,19 +16,19 @@ import (
 
 type server struct {
 	app usecase.ServiceUsecase
-	pb.UnimplementedProductsServiceServer
+	productspb.UnimplementedProductsServiceServer
 }
 
-var _ pb.ProductsServiceServer = (*server)(nil)
+var _ productspb.ProductsServiceServer = (*server)(nil)
 
 var ProductGRPCServerSet = wire.NewSet(RegisterServer)
 
 func RegisterServer(app logging.Usecase, registrar *grpc.Server) error {
-	pb.RegisterProductsServiceServer(registrar, server{app: app})
+	productspb.RegisterProductsServiceServer(registrar, server{app: app})
 	return nil
 }
 
-func (s server) CreateProduct(ctx context.Context, request *pb.CreateProductRequest) (*pb.CreateProductResponse, error) {
+func (s server) CreateProduct(ctx context.Context, request *productspb.CreateProductRequest) (*productspb.CreateProductResponse, error) {
 	id := uuid.New().String()
 	err := s.app.CreateProduct(ctx, commands.CreateProduct{
 		ID:          id,
@@ -36,21 +36,21 @@ func (s server) CreateProduct(ctx context.Context, request *pb.CreateProductRequ
 		Price:       request.GetPrice(),
 		Description: request.GetDescription(),
 	})
-	return &pb.CreateProductResponse{Id: id}, err
+	return &productspb.CreateProductResponse{Id: id}, err
 }
 
-func (s server) GetProduct(ctx context.Context, request *pb.GetProductRequest) (*pb.GetProductResponse, error) {
+func (s server) GetProduct(ctx context.Context, request *productspb.GetProductRequest) (*productspb.GetProductResponse, error) {
 	product, err := s.app.GetProduct(ctx, queries.GetProduct{
 		ID: request.GetId(),
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &pb.GetProductResponse{Product: s.productFromDomain(product)}, nil
+	return &productspb.GetProductResponse{Product: s.productFromDomain(product)}, nil
 }
 
-func (s server) productFromDomain(product *domain.ManagementProduct) *pb.Product {
-	return &pb.Product{
+func (s server) productFromDomain(product *domain.ManagementProduct) *productspb.Product {
+	return &productspb.Product{
 		Id:          product.ID,
 		Name:        product.Name,
 		Description: product.Description,
@@ -58,25 +58,25 @@ func (s server) productFromDomain(product *domain.ManagementProduct) *pb.Product
 	}
 }
 
-func (s server) DeleteProduct(ctx context.Context, request *pb.DeleteProductRequest) (*pb.DeleteProductResponse, error) {
+func (s server) DeleteProduct(ctx context.Context, request *productspb.DeleteProductRequest) (*productspb.DeleteProductResponse, error) {
 	err := s.app.DeleteProduct(ctx, commands.DeleteProduct{
 		ID: request.GetId(),
 	})
-	return &pb.DeleteProductResponse{}, err
+	return &productspb.DeleteProductResponse{}, err
 }
 
-func (s server) IncreasePrice(ctx context.Context, request *pb.IncreasePriceRequest) (*pb.IncreasePriceResponse, error) {
+func (s server) IncreasePrice(ctx context.Context, request *productspb.IncreasePriceRequest) (*productspb.IncreasePriceResponse, error) {
 	err := s.app.IncreasePriceProduct(ctx, commands.IncreasePrice{
 		ID:    request.GetId(),
 		Price: request.GetPrice(),
 	})
-	return &pb.IncreasePriceResponse{}, err
+	return &productspb.IncreasePriceResponse{}, err
 }
 
-func (s server) DecreasePrice(ctx context.Context, request *pb.DecreasePriceRequest) (*pb.DecreasePriceResponse, error) {
+func (s server) DecreasePrice(ctx context.Context, request *productspb.DecreasePriceRequest) (*productspb.DecreasePriceResponse, error) {
 	err := s.app.DecreasePriceProduct(ctx, commands.DecreasePrice{
 		ID:    request.GetId(),
 		Price: request.GetPrice(),
 	})
-	return &pb.DecreasePriceResponse{}, err
+	return &productspb.DecreasePriceResponse{}, err
 }

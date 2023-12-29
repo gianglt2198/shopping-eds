@@ -17,7 +17,7 @@ import (
 	"shopping/product/internal/infra/repo"
 	"shopping/product/internal/logging"
 	"shopping/product/internal/usecase"
-	"shopping/product/pb"
+	"shopping/product/productspb"
 )
 
 type Module struct{}
@@ -28,7 +28,7 @@ func (m Module) Startup(ctx context.Context, container container.Container) erro
 	if err != nil {
 		return err
 	}
-	if err = pb.Registration(reg); err != nil {
+	if err = productspb.Registration(reg); err != nil {
 		return err
 	}
 	eventStream := am.NewEventStream(reg, jetstream.NewStream(container.Config().Nats.Stream, container.JS()))

@@ -4,7 +4,7 @@ import (
 	"context"
 	"shopping/internal/am"
 	"shopping/internal/ddd"
-	"shopping/product/pb"
+	"shopping/product/productspb"
 )
 
 func RegisterProductHandlers(productHandlers ddd.EventHandler[ddd.Event], stream am.EventSubscriber) error {
@@ -12,10 +12,10 @@ func RegisterProductHandlers(productHandlers ddd.EventHandler[ddd.Event], stream
 		return productHandlers.HandleEvent(ctx, eMsg)
 	})
 
-	return stream.Subscribe(pb.ProductAggregateChannel, eventMsghandler, am.MessageFilter{
-		pb.ProductCreatedEvent,
-		pb.ProductPriceIncreasedEvent,
-		pb.ProductPriceDecreasedEvent,
-		pb.ProductDeletedEvent,
+	return stream.Subscribe(productspb.ProductAggregateChannel, eventMsghandler, am.MessageFilter{
+		productspb.ProductCreatedEvent,
+		productspb.ProductPriceIncreasedEvent,
+		productspb.ProductPriceDecreasedEvent,
+		productspb.ProductDeletedEvent,
 	})
 }

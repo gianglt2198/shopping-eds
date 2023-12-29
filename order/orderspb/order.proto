@@ -3,6 +3,7 @@ option go_package = "./proto;pb";
 package orderpb;
 
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 
 service OrderingService {
     rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
@@ -46,6 +47,11 @@ service OrderingService {
             body: "*"
         };
     };
+    rpc SearchOrders(SearchOrdersRequest) returns (SearchOrdersResponse) {
+        option (google.api.http) = {
+            get: "/api/order/search"
+        };
+    }
 }
 
 message Order {
@@ -113,3 +119,23 @@ message CompleteOrderRequest {
 }
 
 message CompleteOrderResponse {}
+
+message SearchOrdersRequest {
+    message Filters {
+      string customer_id = 1;
+      google.protobuf.Timestamp after = 2;
+      google.protobuf.Timestamp before = 3;
+      repeated string product_ids = 4;
+      double min_total = 5;
+      double max_total = 6;
+      string status = 7;
+    }
+    Filters filters = 1;
+    string next = 2;
+    int32 limit = 3;
+  }
+  message SearchOrdersResponse {
+    repeated Order orders = 1;
+    string next = 2;
+  }
+  

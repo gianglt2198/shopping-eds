@@ -57,7 +57,7 @@ services:
   #   hostname: nats-ui
   #   image: piotrpersona/nats-streaming-ui
   #   ports:
-  #     - '8282:8282'
+  #     - 8282:8282
   #   links: 
   #     - nats:nats
   #   environment:

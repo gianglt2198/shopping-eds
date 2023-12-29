@@ -3,6 +3,7 @@ package domain
 import (
 	"shopping/internal/ddd"
 	"shopping/internal/es"
+	"shopping/order/internal/models"
 
 	"github.com/stackus/errors"
 )
@@ -132,7 +133,7 @@ func (o Order) GetTotal() float64 {
 	return total
 }
 
-func (o *Order) AddItem(product *Product, quantity int32) error {
+func (o *Order) AddItem(product *models.Product, quantity int32) error {
 	if !o.IsPending() {
 		return ErrOrderCannotBeModified
 	}

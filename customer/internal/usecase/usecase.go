@@ -3,8 +3,7 @@ package usecase
 import (
 	"context"
 	"shopping/customer/internal/domain"
-
-	"github.com/google/wire"
+	"shopping/internal/ddd"
 )
 
 type (
@@ -25,17 +24,17 @@ type (
 	}
 
 	serviceUsecase struct {
-		customers domain.CustomerRepository
+		customers       domain.CustomerRepository
+		domainPublisher ddd.EventPublisher[ddd.AggregateEvent]
 	}
 )
 
 var _ ServiceUsecase = (*serviceUsecase)(nil)
 
-var UseCaseSet = wire.NewSet(NewService)
-
-func NewService(repo domain.CustomerRepository) ServiceUsecase {
+func NewService(repo domain.CustomerRepository, domainPublisher ddd.EventPublisher[ddd.AggregateEvent]) ServiceUsecase {
 	return &serviceUsecase{
-		customers: repo,
+		customers:       repo,
+		domainPublisher: domainPublisher,
 	}
 }
 
@@ -45,7 +44,16 @@ func (a *serviceUsecase) RegisterCustomer(ctx context.Context, register Register
 		return err
 	}
 
-	return a.customers.Save(ctx, customer)
+	if err = a.customers.Save(ctx, customer); err != nil {
+		return err
+	}
+
+	// publish domain events
+	if err = a.domainPublisher.Publish(ctx, customer.Events()...); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a *serviceUsecase) GetCustomer(ctx context.Context, get GetCustomer) (*domain.Customer, error) {

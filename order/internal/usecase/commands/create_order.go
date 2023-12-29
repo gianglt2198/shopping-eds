@@ -36,7 +36,7 @@ func (h CreateOrderHandler) CreateOrder(ctx context.Context, cmd CreateOrder) er
 	}
 
 	// authorizeCustomer
-	if err = h.customers.GetCustomer(ctx, cmd.CustomerID); err != nil {
+	if _, err = h.customers.GetCustomer(ctx, cmd.CustomerID); err != nil {
 		return errors.Wrap(err, "order customer authorization")
 	}
 

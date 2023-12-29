@@ -4,7 +4,6 @@ import (
 	"context"
 	"shopping/order/internal/domain"
 
-	"github.com/google/wire"
 	"github.com/stackus/errors"
 )
 
@@ -15,8 +14,6 @@ type GetOrder struct {
 type GetOrderHandler struct {
 	repo domain.OrderRepository
 }
-
-var GetOrderUseCaseSet = wire.NewSet(NewGetOrderHandler)
 
 func NewGetOrderHandler(repo domain.OrderRepository) GetOrderHandler {
 	return GetOrderHandler{repo: repo}

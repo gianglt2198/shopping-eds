@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             (unknown)
-// source: pb/order.proto
+// source: orderspb/order.proto
 
-package pb
+package orderspb
 
 import (
 	context "context"
@@ -26,6 +26,7 @@ const (
 	OrderingService_CheckoutOrder_FullMethodName = "/orderpb.OrderingService/CheckoutOrder"
 	OrderingService_ReadyOrder_FullMethodName    = "/orderpb.OrderingService/ReadyOrder"
 	OrderingService_CompleteOrder_FullMethodName = "/orderpb.OrderingService/CompleteOrder"
+	OrderingService_SearchOrders_FullMethodName  = "/orderpb.OrderingService/SearchOrders"
 )
 
 // OrderingServiceClient is the client API for OrderingService service.
@@ -39,6 +40,7 @@ type OrderingServiceClient interface {
 	CheckoutOrder(ctx context.Context, in *CheckoutOrderRequest, opts ...grpc.CallOption) (*CheckoutOrderResponse, error)
 	ReadyOrder(ctx context.Context, in *ReadyOrderRequest, opts ...grpc.CallOption) (*ReadyOrderResponse, error)
 	CompleteOrder(ctx context.Context, in *CompleteOrderRequest, opts ...grpc.CallOption) (*CompleteOrderResponse, error)
+	SearchOrders(ctx context.Context, in *SearchOrdersRequest, opts ...grpc.CallOption) (*SearchOrdersResponse, error)
 }
 
 type orderingServiceClient struct {
@@ -112,6 +114,15 @@ func (c *orderingServiceClient) CompleteOrder(ctx context.Context, in *CompleteO
 	return out, nil
 }
 
+func (c *orderingServiceClient) SearchOrders(ctx context.Context, in *SearchOrdersRequest, opts ...grpc.CallOption) (*SearchOrdersResponse, error) {
+	out := new(SearchOrdersResponse)
+	err := c.cc.Invoke(ctx, OrderingService_SearchOrders_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrderingServiceServer is the server API for OrderingService service.
 // All implementations should embed UnimplementedOrderingServiceServer
 // for forward compatibility
@@ -123,6 +134,7 @@ type OrderingServiceServer interface {
 	CheckoutOrder(context.Context, *CheckoutOrderRequest) (*CheckoutOrderResponse, error)
 	ReadyOrder(context.Context, *ReadyOrderRequest) (*ReadyOrderResponse, error)
 	CompleteOrder(context.Context, *CompleteOrderRequest) (*CompleteOrderResponse, error)
+	SearchOrders(context.Context, *SearchOrdersRequest) (*SearchOrdersResponse, error)
 }
 
 // UnimplementedOrderingServiceServer should be embedded to have forward compatible implementations.
@@ -149,6 +161,9 @@ func (UnimplementedOrderingServiceServer) ReadyOrder(context.Context, *ReadyOrde
 }
 func (UnimplementedOrderingServiceServer) CompleteOrder(context.Context, *CompleteOrderRequest) (*CompleteOrderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CompleteOrder not implemented")
+}
+func (UnimplementedOrderingServiceServer) SearchOrders(context.Context, *SearchOrdersRequest) (*SearchOrdersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchOrders not implemented")
 }
 
 // UnsafeOrderingServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -288,6 +303,24 @@ func _OrderingService_CompleteOrder_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderingService_SearchOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchOrdersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderingServiceServer).SearchOrders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderingService_SearchOrders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderingServiceServer).SearchOrders(ctx, req.(*SearchOrdersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // OrderingService_ServiceDesc is the grpc.ServiceDesc for OrderingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -323,7 +356,11 @@ var OrderingService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "CompleteOrder",
 			Handler:    _OrderingService_CompleteOrder_Handler,
 		},
+		{
+			MethodName: "SearchOrders",
+			Handler:    _OrderingService_SearchOrders_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pb/order.proto",
+	Metadata: "orderspb/order.proto",
 }

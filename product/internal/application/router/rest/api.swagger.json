@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "pb/events.proto",
+    "title": "productspb/events.proto",
     "version": "version not set"
   },
   "tags": [

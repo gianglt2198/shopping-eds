@@ -1,32 +1,29 @@
-package router
+package router_grpc
 
 import (
 	"context"
+	"shopping/customer/customerspb"
 	"shopping/customer/internal/domain"
 	"shopping/customer/internal/logging"
 	"shopping/customer/internal/usecase"
-	"shopping/customer/pb"
 
 	"github.com/google/uuid"
-	"github.com/google/wire"
 	"google.golang.org/grpc"
 )
 
 type server struct {
 	app usecase.ServiceUsecase
-	pb.UnimplementedCustomersServiceServer
+	customerspb.UnimplementedCustomersServiceServer
 }
 
-var _ pb.CustomersServiceServer = (*server)(nil)
-
-var CustomerGRPCServerSet = wire.NewSet(RegisterServer)
+var _ customerspb.CustomersServiceServer = (*server)(nil)
 
 func RegisterServer(app logging.Usecase, registrar *grpc.Server) error {
-	pb.RegisterCustomersServiceServer(registrar, server{app: app})
+	customerspb.RegisterCustomersServiceServer(registrar, server{app: app})
 	return nil
 }
 
-func (s server) RegisterCustomer(ctx context.Context, request *pb.RegisterCustomerRequest) (*pb.RegisterCustomerResponse, error) {
+func (s server) RegisterCustomer(ctx context.Context, request *customerspb.RegisterCustomerRequest) (*customerspb.RegisterCustomerResponse, error) {
 	id := uuid.New().String()
 	err := s.app.RegisterCustomer(ctx, usecase.RegisterCustomer{
 		ID:        id,
@@ -34,19 +31,19 @@ func (s server) RegisterCustomer(ctx context.Context, request *pb.RegisterCustom
 		SmsNumber: request.GetSmsNumber(),
 		Email:     request.GetEmail(),
 	})
-	return &pb.RegisterCustomerResponse{Id: id}, err
+	return &customerspb.RegisterCustomerResponse{Id: id}, err
 }
 
-func (s server) GetCustomer(ctx context.Context, request *pb.GetCustomerRequest) (*pb.GetCustomerResponse, error) {
+func (s server) GetCustomer(ctx context.Context, request *customerspb.GetCustomerRequest) (*customerspb.GetCustomerResponse, error) {
 	customer, err := s.app.GetCustomer(ctx, usecase.GetCustomer{
 		ID: request.GetId(),
 	})
-	return &pb.GetCustomerResponse{Customer: s.customerFromDomain(customer)}, err
+	return &customerspb.GetCustomerResponse{Customer: s.customerFromDomain(customer)}, err
 }
 
-func (s server) customerFromDomain(customer *domain.Customer) *pb.Customer {
-	return &pb.Customer{
-		Id:        customer.ID,
+func (s server) customerFromDomain(customer *domain.Customer) *customerspb.Customer {
+	return &customerspb.Customer{
+		Id:        customer.ID(),
 		Name:      customer.Name,
 		SmsNumber: customer.SmsNumber,
 		Email:     customer.Email,
