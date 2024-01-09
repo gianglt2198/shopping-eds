@@ -2,9 +2,8 @@ package usecase
 
 import (
 	"context"
+	"shopping/internal/ddd"
 	"shopping/payment/internal/domain"
-
-	"github.com/google/wire"
 )
 
 type (
@@ -35,19 +34,17 @@ type (
 	}
 
 	serviceUsecase struct {
-		payments domain.PaymentRepository
-		orders   domain.OrderRepository
+		payments  domain.PaymentRepository
+		publisher ddd.EventPublisher[ddd.Event]
 	}
 )
 
 var _ ServiceUsecase = (*serviceUsecase)(nil)
 
-var UseCaseSet = wire.NewSet(NewService)
-
-func NewService(repo domain.PaymentRepository, orders domain.OrderRepository) ServiceUsecase {
+func NewService(repo domain.PaymentRepository, publisher ddd.EventPublisher[ddd.Event]) ServiceUsecase {
 	return &serviceUsecase{
-		payments: repo,
-		orders:   orders,
+		payments:  repo,
+		publisher: publisher,
 	}
 }
 
@@ -61,7 +58,10 @@ func (a *serviceUsecase) CreateInvoice(ctx context.Context, create CreateInvoice
 		return err
 	}
 
-	if err := a.orders.ReadyOrder(ctx, invoice.OrderID, invoice.ID); err != nil {
+	if err = a.publisher.Publish(ctx, ddd.NewEvent(domain.InvoiceCreatedEvent, &domain.InvoiceCreated{
+		ID:      invoice.ID,
+		OrderID: invoice.OrderID,
+	})); err != nil {
 		return err
 	}
 
@@ -83,7 +83,10 @@ func (a *serviceUsecase) PayInvoice(ctx context.Context, update PayInvoice) erro
 		return err
 	}
 
-	if err := a.orders.CompleteOrder(ctx, payment.OrderID); err != nil {
+	if err = a.publisher.Publish(ctx, ddd.NewEvent(domain.InvoicePaidEvent, &domain.InvoicePaid{
+		ID:      payment.ID,
+		OrderID: payment.OrderID,
+	})); err != nil {
 		return err
 	}
 

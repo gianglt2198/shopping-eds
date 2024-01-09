@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             (unknown)
-// source: pb/payment.proto
+// source: paymentspb/payment.proto
 
-package pb
+package paymentspb
 
 import (
 	context "context"
@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	PaymentsService_CreateInvoice_FullMethodName = "/paymentpb.PaymentsService/CreateInvoice"
-	PaymentsService_GetInvoice_FullMethodName    = "/paymentpb.PaymentsService/GetInvoice"
-	PaymentsService_PayInvoice_FullMethodName    = "/paymentpb.PaymentsService/PayInvoice"
-	PaymentsService_CancelInvoice_FullMethodName = "/paymentpb.PaymentsService/CancelInvoice"
+	PaymentsService_CreateInvoice_FullMethodName = "/paymentspb.PaymentsService/CreateInvoice"
+	PaymentsService_GetInvoice_FullMethodName    = "/paymentspb.PaymentsService/GetInvoice"
+	PaymentsService_PayInvoice_FullMethodName    = "/paymentspb.PaymentsService/PayInvoice"
+	PaymentsService_CancelInvoice_FullMethodName = "/paymentspb.PaymentsService/CancelInvoice"
 )
 
 // PaymentsServiceClient is the client API for PaymentsService service.
@@ -193,7 +193,7 @@ func _PaymentsService_CancelInvoice_Handler(srv interface{}, ctx context.Context
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var PaymentsService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "paymentpb.PaymentsService",
+	ServiceName: "paymentspb.PaymentsService",
 	HandlerType: (*PaymentsServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -214,5 +214,5 @@ var PaymentsService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pb/payment.proto",
+	Metadata: "paymentspb/payment.proto",
 }

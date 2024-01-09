@@ -24,9 +24,9 @@ func (h ProductHandlers[T]) HandleEvent(ctx context.Context, event T) error {
 	case productspb.ProductCreatedEvent:
 		return h.onProductCreated(ctx, event)
 	case productspb.ProductPriceIncreasedEvent:
-		return h.onProductPriceIncreased(ctx, event)
+		return h.onProductPriceChanged(ctx, event)
 	case productspb.ProductPriceDecreasedEvent:
-		return h.onProductPriceDecreased(ctx, event)
+		return h.onProductPriceChanged(ctx, event)
 	case productspb.ProductDeletedEvent:
 		return h.onProductDeleted(ctx, event)
 	}
@@ -38,12 +38,7 @@ func (h ProductHandlers[T]) onProductCreated(ctx context.Context, event ddd.Even
 	return h.cache.Add(ctx, payload.GetId(), payload.GetName(), payload.GetPrice())
 }
 
-func (h ProductHandlers[T]) onProductPriceIncreased(ctx context.Context, event ddd.Event) error {
-	payload := event.Payload().(*productspb.ProductPriceChanged)
-	return h.cache.UpdatePrice(ctx, payload.GetId(), payload.GetDelta())
-}
-
-func (h ProductHandlers[T]) onProductPriceDecreased(ctx context.Context, event ddd.Event) error {
+func (h ProductHandlers[T]) onProductPriceChanged(ctx context.Context, event ddd.Event) error {
 	payload := event.Payload().(*productspb.ProductPriceChanged)
 	return h.cache.UpdatePrice(ctx, payload.GetId(), payload.GetDelta())
 }

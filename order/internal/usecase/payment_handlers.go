@@ -3,41 +3,43 @@ package usecase
 import (
 	"context"
 	"shopping/internal/ddd"
-	"shopping/order/internal/domain"
+	"shopping/order/internal/usecase/commands"
+	"shopping/payment/paymentspb"
 )
 
-type PaymentHandlers[T ddd.AggregateEvent] struct {
-	payments domain.PaymentRepository
+type PaymentHandlers[T ddd.Event] struct {
+	orderUsecase ServiceUsecase
 }
 
-var _ ddd.EventHandler[ddd.AggregateEvent] = (*PaymentHandlers[ddd.AggregateEvent])(nil)
+var _ ddd.EventHandler[ddd.Event] = (*PaymentHandlers[ddd.Event])(nil)
 
-func NewPaymentHandlers(payments domain.PaymentRepository) *PaymentHandlers[ddd.AggregateEvent] {
-	return &PaymentHandlers[ddd.AggregateEvent]{
-		payments: payments,
+func NewPaymentHandlers(orderUsecase ServiceUsecase) PaymentHandlers[ddd.Event] {
+	return PaymentHandlers[ddd.Event]{
+		orderUsecase: orderUsecase,
 	}
 }
 
 func (h PaymentHandlers[T]) HandleEvent(ctx context.Context, event T) error {
 	switch event.EventName() {
-	case domain.OrderCheckedOutEvent:
-		return h.OnOrderCheckedout(ctx, event)
-	case domain.OrderReadiedEvent:
-		return h.OnOrderCancelled(ctx, event)
+	case paymentspb.InvoiceCreatedEvent:
+		return h.onInvoiceCreated(ctx, event)
+	case paymentspb.InvoicePaidEvent:
+		return h.onInvoicePaid(ctx, event)
 	}
 	return nil
 }
 
-func (h PaymentHandlers[T]) OnOrderCheckedout(ctx context.Context, event ddd.AggregateEvent) error {
-	orderCheckedout := event.Payload().(*domain.OrderCheckedout)
-	_, err := h.payments.CreateInvoice(ctx, event.AggregateID(), orderCheckedout.CustomerID, orderCheckedout.Total)
-	return err
+func (h PaymentHandlers[T]) onInvoiceCreated(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*paymentspb.InvoiceCreated)
+	return h.orderUsecase.ReadyOrder(ctx, commands.ReadyOrder{
+		ID:        payload.GetOrderId(),
+		PaymentID: payload.GetId(),
+	})
 }
 
-func (h PaymentHandlers[T]) OnOrderCancelled(ctx context.Context, event ddd.AggregateEvent) error {
-	orderCancelled := event.Payload().(*domain.OrderCancelled)
-	if orderCancelled.PaymentID != "" {
-		return h.payments.CancelInvoice(ctx, orderCancelled.PaymentID)
-	}
-	return nil
+func (h PaymentHandlers[T]) onInvoicePaid(ctx context.Context, event ddd.Event) error {
+	payload := event.Payload().(*paymentspb.InvoicePaid)
+	return h.orderUsecase.CompleteOrder(ctx, commands.CompleteOrder{
+		ID: payload.GetOrderId(),
+	})
 }

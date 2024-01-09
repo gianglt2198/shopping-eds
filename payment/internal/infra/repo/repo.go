@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"shopping/payment/internal/domain"
-
-	"github.com/google/wire"
 )
 
 type PaymentRepository struct {
@@ -15,8 +13,6 @@ type PaymentRepository struct {
 }
 
 var _ domain.PaymentRepository = (*PaymentRepository)(nil)
-
-var RepositorySet = wire.NewSet(NewPaymentRepository)
 
 func NewPaymentRepository(tableName string, db *sql.DB) domain.PaymentRepository {
 	return PaymentRepository{
