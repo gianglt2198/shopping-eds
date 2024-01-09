@@ -3,7 +3,7 @@ package grpc_router
 import (
 	"context"
 	"shopping/order/internal/domain"
-	paymentspb "shopping/payment/pb"
+	paymentspb "shopping/payment/paymentspb"
 
 	"google.golang.org/grpc"
 )

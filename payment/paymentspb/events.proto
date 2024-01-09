@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package paymentspb;
+
+message InvoiceCreated {
+    string id = 1;
+    string order_id = 2;
+}
+
+message InvoicePaid {
+    string id = 1;
+    string order_id = 2;
+}

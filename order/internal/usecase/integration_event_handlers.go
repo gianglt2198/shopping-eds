@@ -44,7 +44,7 @@ func (h IntegrationEventHandlers[T]) onOrderCreated(ctx context.Context, event T
 
 	return h.publisher.Publish(ctx, orderspb.OrderAggregateChannel,
 		ddd.NewEvent(orderspb.OrderCreatedEvent, &orderspb.OrderCreated{
-			Id:         event.ID(),
+			Id:         event.AggregateID(),
 			CustomerId: payload.CustomerID,
 		}))
 }
@@ -53,7 +53,7 @@ func (h IntegrationEventHandlers[T]) onOrderAddedItem(ctx context.Context, event
 	payload := event.Payload().(*domain.OrderAddedItem)
 	return h.publisher.Publish(ctx, orderspb.OrderAggregateChannel,
 		ddd.NewEvent(orderspb.OrderAddedItemEvent, &orderspb.OrderAddedItem{
-			Id: event.ID(),
+			Id: event.AggregateID(),
 			Item: &orderspb.OrderAddedItem_Item{
 				ProductId: payload.Item.ProductID,
 				Price:     payload.Item.Price,
@@ -66,7 +66,7 @@ func (h IntegrationEventHandlers[T]) onOrderCheckedOut(ctx context.Context, even
 	payload := event.Payload().(*domain.OrderCheckedout)
 	return h.publisher.Publish(ctx, orderspb.OrderAggregateChannel,
 		ddd.NewEvent(orderspb.OrderCheckedOutEvent, &orderspb.OrderCheckedOut{
-			Id:         event.ID(),
+			Id:         event.AggregateID(),
 			CustomerId: payload.CustomerID,
 			Total:      payload.Total,
 		}))
@@ -76,7 +76,7 @@ func (h IntegrationEventHandlers[T]) onOrderReadied(ctx context.Context, event T
 	payload := event.Payload().(*domain.OrderReadied)
 	return h.publisher.Publish(ctx, orderspb.OrderAggregateChannel,
 		ddd.NewEvent(orderspb.OrderReadiedEvent, &orderspb.OrderReadied{
-			Id:        event.ID(),
+			Id:        event.AggregateID(),
 			PaymentId: payload.PaymenID,
 		}))
 }
@@ -85,7 +85,7 @@ func (h IntegrationEventHandlers[T]) onOrderCanceled(ctx context.Context, event 
 	payload := event.Payload().(*domain.OrderCancelled)
 	return h.publisher.Publish(ctx, orderspb.OrderAggregateChannel,
 		ddd.NewEvent(orderspb.OrderCanceledEvent, &orderspb.OrderCanceled{
-			Id:        event.ID(),
+			Id:        event.AggregateID(),
 			PaymentId: payload.PaymentID,
 		}))
 }
@@ -93,6 +93,6 @@ func (h IntegrationEventHandlers[T]) onOrderCanceled(ctx context.Context, event 
 func (h IntegrationEventHandlers[T]) onOrderCompleted(ctx context.Context, event T) error {
 	return h.publisher.Publish(ctx, orderspb.OrderAggregateChannel,
 		ddd.NewEvent(orderspb.OrderCompletedEvent, &orderspb.OrderCompleted{
-			Id: event.ID(),
+			Id: event.AggregateID(),
 		}))
 }

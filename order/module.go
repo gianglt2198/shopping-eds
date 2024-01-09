@@ -11,6 +11,7 @@ import (
 	"shopping/internal/jetstream"
 	"shopping/internal/registry"
 	"shopping/internal/registry/serdes"
+	"shopping/payment/paymentspb"
 	"shopping/product/productspb"
 
 	grpc_router "shopping/order/internal/application/router/grpc"
@@ -20,6 +21,7 @@ import (
 	"shopping/order/internal/infra/repo"
 	"shopping/order/internal/logging"
 	"shopping/order/internal/usecase"
+	"shopping/order/orderspb"
 )
 
 type Module struct{}
@@ -34,6 +36,12 @@ func (m Module) Startup(ctx context.Context, container container.Container) (err
 		return err
 	}
 	if err = customerspb.Registrations(reg); err != nil {
+		return err
+	}
+	if err = paymentspb.Registration(reg); err != nil {
+		return err
+	}
+	if err = orderspb.Registrations(reg); err != nil {
 		return err
 	}
 	eventStream := am.NewEventStream(reg, jetstream.NewStream(container.Config().Nats.Stream, container.JS()))
@@ -54,12 +62,13 @@ func (m Module) Startup(ctx context.Context, container container.Container) (err
 	products := repo.NewProductCacheRepository(ctx, "ordering.products_cache", container.DB(), grpc_router.NewProductRepository(conn))
 	searching := repo.NewSearchingRepository("ordering.order", container.DB())
 	// setup Applications
-	app := logging.LogApplicationAccess(usecase.NewService(orders, payments, customers, products, searching), container.Logger())
-
-	paymentHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
-		usecase.NewPaymentHandlers(payments),
-		"Payments",
+	app := logging.LogApplicationAccess(
+		usecase.NewService(orders, payments, customers, products, searching),
 		container.Logger(),
+	)
+	paymentHandlers := logging.LogEventHandlerAccess[ddd.Event](
+		usecase.NewPaymentHandlers(app),
+		"Payment", container.Logger(),
 	)
 	productHandlers := logging.LogEventHandlerAccess[ddd.Event](
 		usecase.NewProductHandlers(products),
@@ -73,6 +82,10 @@ func (m Module) Startup(ctx context.Context, container container.Container) (err
 		usecase.NewSearchingOrdertHandlers(searching, customers, products),
 		"Searching", container.Logger(),
 	)
+	integrationEventHandlers := logging.LogEventHandlerAccess[ddd.AggregateEvent](
+		usecase.NewIntegrationEventHandlers(eventStream),
+		"IntegrationEvents", container.Logger(),
+	)
 
 	// setup Driver applications
 	if err := grpc_router.RegisterServer(app, container.RPC()); err != nil {
@@ -84,14 +97,17 @@ func (m Module) Startup(ctx context.Context, container container.Container) (err
 	if err := rest_router.RegisterSwagger(container.Mux()); err != nil {
 		return err
 	}
-	handlers.RegisterSearchingHandler(searchingHandlers, domainDispatcher)
-	handlers.RegisterPaymentHandlers(paymentHandlers, domainDispatcher)
+	if err = handlers.RegisterPaymentHandlers(paymentHandlers, eventStream); err != nil {
+		return err
+	}
 	if err = handlers.RegisterProductHandlers(productHandlers, eventStream); err != nil {
 		return err
 	}
 	if err = handlers.RegisterCustomerHandlers(customerHandlers, eventStream); err != nil {
 		return err
 	}
+	handlers.RegisterSearchingHandler(searchingHandlers, domainDispatcher)
+	handlers.RegisterIntegrationEventHandlers(integrationEventHandlers, domainDispatcher)
 	return nil
 }
 

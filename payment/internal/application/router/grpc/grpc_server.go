@@ -1,11 +1,11 @@
-package router
+package router_grpc
 
 import (
 	"context"
 	"shopping/payment/internal/domain"
 	"shopping/payment/internal/logging"
 	"shopping/payment/internal/usecase"
-	"shopping/payment/pb"
+	pb "shopping/payment/paymentspb"
 
 	"github.com/google/uuid"
 	"github.com/google/wire"

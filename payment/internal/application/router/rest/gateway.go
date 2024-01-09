@@ -1,8 +1,8 @@
-package router
+package router_rest
 
 import (
 	"context"
-	"shopping/payment/pb"
+	pb "shopping/payment/paymentspb"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"

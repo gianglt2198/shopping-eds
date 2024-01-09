@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "pb/payment.proto",
+    "title": "paymentspb/events.proto",
     "version": "version not set"
   },
   "tags": [
@@ -23,7 +23,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/paymentpbGetInvoiceResponse"
+              "$ref": "#/definitions/paymentspbGetInvoiceResponse"
             }
           },
           "default": {
@@ -51,7 +51,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/paymentpbCreateInvoiceResponse"
+              "$ref": "#/definitions/paymentspbCreateInvoiceResponse"
             }
           },
           "default": {
@@ -67,7 +67,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/paymentpbCreateInvoiceRequest"
+              "$ref": "#/definitions/paymentspbCreateInvoiceRequest"
             }
           }
         ],
@@ -83,7 +83,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/paymentpbCancelInvoiceResponse"
+              "$ref": "#/definitions/paymentspbCancelInvoiceResponse"
             }
           },
           "default": {
@@ -99,7 +99,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/paymentpbCancelInvoiceRequest"
+              "$ref": "#/definitions/paymentspbCancelInvoiceRequest"
             }
           }
         ],
@@ -115,7 +115,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/paymentpbPayInvoiceResponse"
+              "$ref": "#/definitions/paymentspbPayInvoiceResponse"
             }
           },
           "default": {
@@ -140,7 +140,7 @@
     }
   },
   "definitions": {
-    "paymentpbCancelInvoiceRequest": {
+    "paymentspbCancelInvoiceRequest": {
       "type": "object",
       "properties": {
         "id": {
@@ -148,7 +148,7 @@
         }
       }
     },
-    "paymentpbCancelInvoiceResponse": {
+    "paymentspbCancelInvoiceResponse": {
       "type": "object",
       "properties": {
         "statusCode": {
@@ -156,7 +156,7 @@
         }
       }
     },
-    "paymentpbCreateInvoiceRequest": {
+    "paymentspbCreateInvoiceRequest": {
       "type": "object",
       "properties": {
         "customerId": {
@@ -171,7 +171,7 @@
         }
       }
     },
-    "paymentpbCreateInvoiceResponse": {
+    "paymentspbCreateInvoiceResponse": {
       "type": "object",
       "properties": {
         "statusCode": {
@@ -182,18 +182,18 @@
         }
       }
     },
-    "paymentpbGetInvoiceResponse": {
+    "paymentspbGetInvoiceResponse": {
       "type": "object",
       "properties": {
         "statusCode": {
           "type": "string"
         },
         "invoice": {
-          "$ref": "#/definitions/paymentpbInvoice"
+          "$ref": "#/definitions/paymentspbInvoice"
         }
       }
     },
-    "paymentpbInvoice": {
+    "paymentspbInvoice": {
       "type": "object",
       "properties": {
         "id": {
@@ -214,7 +214,7 @@
         }
       }
     },
-    "paymentpbPayInvoiceResponse": {
+    "paymentspbPayInvoiceResponse": {
       "type": "object",
       "properties": {
         "statusCode": {
